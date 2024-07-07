@@ -317,7 +317,7 @@ elif st.session_state.level == 6:
         image = Image.open(uploaded_file)
         st.image(image, caption='Uploaded Image.', use_column_width=True)
         st.write("")
-        st.write("Malaki! I-click ang 'Ask AI Assistant.")
+        st.write("Malaki!")
 
         # # Optionally, save the uploaded file to disk
         # with open(f"uploaded_image_{uploaded_file.name}", "wb") as f:
