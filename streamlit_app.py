@@ -319,10 +319,10 @@ elif st.session_state.level == 6:
         st.write("")
         st.write("Malaki! I-click ang 'Ask AI Assistant.")
 
-        # Optionally, save the uploaded file to disk
-        with open(f"uploaded_images/uploaded_image_{uploaded_file.name}", "wb") as f:
-            f.write(bytes_data)
-            # st.write("Image saved.")
+        # # Optionally, save the uploaded file to disk
+        # with open(f"uploaded_image_{uploaded_file.name}", "wb") as f:
+        #     f.write(bytes_data)
+        #     # st.write("Image saved.")
     else:
         st.write("Wala pang na-upload na larawan.")
 
