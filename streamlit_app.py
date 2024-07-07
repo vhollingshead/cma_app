@@ -320,7 +320,7 @@ elif st.session_state.level == 6:
         st.write("Malaki! I-click ang 'Ask AI Assistant.")
 
         # Optionally, save the uploaded file to disk
-        with open(f"/workspaces/cma_app/uploaded_images/uploaded_image_{uploaded_file.name}", "wb") as f:
+        with open(f"uploaded_images/uploaded_image_{uploaded_file.name}", "wb") as f:
             f.write(bytes_data)
             # st.write("Image saved.")
     else:
