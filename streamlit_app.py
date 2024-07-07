@@ -10,7 +10,7 @@ def get_base64_of_bin_file(bin_file):
     return base64.b64encode(data).decode()
 
 # Path to the logo image
-logo_path = "/workspaces/cma_app/logos.png"
+logo_path = "logos.png"
 logo_base64 = get_base64_of_bin_file(logo_path)
 
 # Add CMA logo to top center and subtitle underneath
