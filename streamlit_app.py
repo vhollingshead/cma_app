@@ -325,3 +325,22 @@ elif st.session_state.level == 6:
             # st.write("Image saved.")
     else:
         st.write("Wala pang na-upload na larawan.")
+
+
+### Sidebar
+
+with st.sidebar:
+    st.header("Hello! 👋 Ako si ang inyong friendly AI Assistant 🤖.")
+    st.caption("Tumutulong ako sa mga overseas Filipino worker sa mga tanong tungkol sa pre-deployment, legal na karapatan, at repatriation. Kung kailangan mo ng impormasyon o tulong, narito ako para magbigay ng tumpak na impormasyon at suporta. Sabik akong tulungan ka!")
+    # st.divider()
+
+    with st.expander("Sino si CMA?"):
+        st.caption("The Center for Migrant Advocacy – Philippines is an advocacy group that promotes the rights of overseas Filipinos, land or sea-based migrant workers, Filipino immigrants and their families. The center helps to improve the economic, social and political conditions of migrant Filipino families everywhere through policy advocacy, information dissemination, networking, capability-building and direct assistance.")
+
+    with st.expander("Bakit mahalaga ang AI Assistant na ito?"):
+        st.caption("Ang Center for Migrant Advocacy ay nag-aanyaya sa pakikipagtulungan at puna upang pinuhin at i-optimize ang solusyon na ito, na tinitiyak na epektibong natutugunan nito ang magkakaibang pangangailangan ng mga OFW. Ang session na ito ay naglalayon na mangalap ng mahalagang feedback mula sa dati at kasalukuyang mga OFW upang pinuhin ang disenyo at functionality ng AI assistant. Napakahalaga ng ganitong mga pananaw habang nagsisikap ang CMA na magkaroon ng makabuluhang epekto sa buhay ng mga OFW sa pamamagitan ng makabagong teknolohiya. Inaasahan namin ang iyong pakikilahok at mga kontribusyon habang tinutuklasan namin ang mga posibilidad ng pagbabagong inisyatiba na ito.")
+
+    with st.expander("Privacy Disclaimer"):
+        st.caption("Ang AI Assistant na ito ay naglalayong magbigay ng makatotohanang impormasyon tungkol sa iyong sitwasyon at hindi pa kumukolekta ng iyong personal na impormasyon. Ginagamit namin ang impormasyong ito upang maunawaan ang iba't ibang sitwasyon ng mga OFW at kanilang mga pamilya at kung paano sumangguni sa gobyerno o iba pang NGO tungkol sa iyong sitwasyon o problema. Maaari kang makipag-usap sa isang case manager pagkatapos gamitin ang AI Assistant na ito.")
+
+    st.caption('<p style="text-align:center">Made with ❤️ by CMA</p>', unsafe_allow_html=True)
