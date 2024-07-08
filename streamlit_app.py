@@ -25,14 +25,39 @@ st.markdown(f"""
 
 st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
 
-# Define button sets for each level
 level1_buttons = ['Pre-Deployment', 'Wages', 'Repatriation', 'Contract']
 level2_buttons = {
-    'Pre-Deployment': ['Ano ang mga kinakailangang dokumento?', 'Paano ako makakadalo sa PDOS?', 'Ano ang mga medical tests?', 'May specific na training programs ba?', 'Wala dito ang tanong ko.'],
-    'Wages': ['Paano masisiguro ang tamang sahod?', 'Ano ang gagawin kung huli ang bayad?', 'Paano i-report ang discrepancies?', 'May legal protections ba para sa wage theft?', 'Wala dito ang tanong ko.'],
-    'Repatriation': ['Ano ang mga hakbang para sa mabilis na pag-uwi?', 'Sino ang pwedeng kontakin?', 'Anong financial assistance ang available?', 'Paano iayos ang pagpapadala ng gamit?', 'Wala dito ang tanong ko.'],
-    'Contract': ['Ano ang dapat tingnan sa kontrata?', 'Paano masisiguro kung legal ang kontrata?', 'Ano ang gagawin kung may bagong kontrata?', 'Paano makakuha ng legal advice?', 'Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?', 'Wala dito ang tanong ko.']
+    'Pre-Deployment': [
+        'Ano ang mga kinakailangang dokumento?',
+        'Paano ako makakadalo sa PDOS?',
+        'Ano ang mga medical tests?',
+        'May specific na training programs ba?',
+        'Wala dito ang tanong ko.'
+    ],
+    'Wages': [
+        'Paano masisiguro ang tamang sahod?',
+        'Ano ang gagawin kung delayed ang sahod ko?',
+        'Paano i-report ang mga hindi nabayaran na sahod?',
+        'May legal protections ba para sa wage theft o hindi tamang pagpapasahod?',
+        'Wala dito ang tanong ko.'
+    ],
+    'Repatriation': [
+        'Ano ang mga hakbang para sa mabilis na pag-uwi?',
+        'Sino ang pwedeng kontakin?',
+        'Anong financial assistance ang available?',
+        'Paano iayos ang pagpapadala ng gamit?',
+        'Wala dito ang tanong ko.'
+    ],
+    'Contract': [
+        'Ano ang dapat tingnan sa kontrata?',
+        'Paano masisiguro kung legal ang kontrata?',
+        'Ano ang gagawin kung may bagong kontrata?',
+        'Paano makakuha ng legal advice?',
+        'Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?',
+        'Wala dito ang tanong ko.'
+    ]
 }
+
 level3_buttons = {
     'Ano ang mga kinakailangang dokumento?': [
         'Mayroon ka na bang valid na passport, o kailangan mo ng tulong sa pag-aapply?',
@@ -41,92 +66,90 @@ level3_buttons = {
         'Kailangan mo ba ng tulong para ma-verify ang kontrata mo sa POEA?'
     ],
     'Paano ako makakadalo sa PDOS?': [
-        'Alam mo ba ang proseso ng pagpaparehistro para sa PDOS, o kailangan mo ng detalyadong hakbang?',
-        'Gusto mo bang malaman ang pinakamalapit na lokasyon ng PDOS seminar?',
+        'Ano ang mga dapat kong malaman tungkol sa PDOS?',
+        'Gusto mo bang malaman ang pinakamalapit na lokasyon ng PDOS?',
         'Kailangan mo ba ng tulong sa mga dokumentong kailangan para makadalo sa PDOS?',
         'Interesado ka ba sa online PDOS dahil sa lokasyon mo?'
     ],
     'Ano ang mga medical tests?': [
-        'May nahanap ka na bang sertipikadong klinika para sa mga tests, o kailangan mo ng rekomendasyon?',
-        'Kailangan mo ba ng detalyadong listahan ng mga medical tests na kailangan para sa trabaho mo?',
-        'Mayroon ka bang partikular na health concerns na gusto mong pag-usapan bago magpatest?',
-        'Gusto mo bang malaman ang mga gastos na kasama sa medical tests?'
+        'Anu-ano ang mga accredited clinics ng Department of Health at Department of Migrant Workers? (Maaari ka ring magtanong sa recruitment agency mo)',
+        'Anu-ano ang mga medical requirements?'
     ],
     'May specific na training programs ba?': [
-        'Anong uri ng trabaho ang pupuntahan mo, at kailangan mo ba ng specific skill training para dito?',
-        'Kailangan mo ba ng language training para sa bansang pupuntahan mo?',
+        'Anu-ano ang skill trainings ang kailangan mo para sa trabaho mo sa ibang bansa?',
+        'Kailangan mo ba ng language training?',
         'Gusto mo bang malaman kung saan makakahanap ng cultural orientation programs?',
         'Interesado ka ba sa safety at security training na kaugnay sa trabaho mo?'
     ],
     'Paano masisiguro ang tamang sahod?': [
         'Kailangan mo ba ng tulong sa pag-unawa sa mga detalye ng sahod sa kontrata mo?',
         'Kailangan mo ba ng payo kung paano itago ang mga natatanggap mong sahod?',
-        'May mga discrepancies ba sa inaasahan at natatanggap mong sahod?',
-        'Gusto mo bang malaman ang mga hakbang kung sa tingin mo ay ninanakawan ka ng sahod?'
+        'Hindi ka ba nababayaran ng tamang sahod at sa tamang panahon?',
+        'Gusto mo bang malaman ang mga hakbang kung sa tingin mo ay hindi tama ang pagpapasahod sayo?'
     ],
-    'Ano ang gagawin kung huli ang bayad?': [
-        'Sinubukan mo na bang pag-usapan ito nang direkta sa employer mo?',
+    'Ano ang gagawin kung delayed ang sahod ko?': [
+        'Sinubukan mo na bang kausapin ang amo o employer mo tungkol dito?',
         'Alam mo ba ang local labor laws tungkol sa tamang pagbabayad ng sahod?',
-        'Kailangan mo ba ng tulong sa pag-dokumento ng mga na-delay na bayad?',
-        'Gusto mo bang malaman kung paano i-escalate ang isyu sa POLO o embahada?'
+        'Kailangan mo ba ng tulong sa pag-record ng mga sahod mo na hindi nabayaran ng employer mo?',
+        'Gusto mo bang malaman kung paano magsumbong sa POLO/MWO?'
     ],
-    'Paano i-report ang discrepancies?': [
+    'Paano i-report ang mga hindi nabayaran na sahod?': [
         'Nakalap mo na ba ang lahat ng kinakailangang ebidensya tulad ng pay slips at kontrata?',
-        'Alam mo ba ang proseso ng pag-report sa POLO at embahada?',
+        'Alam mo ba ang proseso ng pag-report sa POLO/MWO?',
         'Kailangan mo ba ng gabay sa paggamit ng online platforms para mag-file ng reklamo?',
         'Naghahanap ka ba ng mga local organizations na pwedeng tumulong sa kaso mo?'
     ],
-    'May legal protections ba para sa wage theft?': [
+    'May legal protections ba para sa wage theft o hindi tamang pagpapasahod?': [
         'Gusto mo bang malaman ang mga specific na karapatan sa ilalim ng Migrant Workers Act (RA 8042)?',
         'Interesado ka bang malaman ang mga legal remedies sa bansa kung saan ka nagtatrabaho?',
         'Kailangan mo ba ng contacts para sa labor attachés o legal aid services?',
-        'Alam mo ba ang proseso ng pag-file ng claims para sa wage theft?'
+        'Alam mo ba ang proseso ng pag-file ng money claims para sa wage theft?'
     ],
     'Ano ang mga hakbang para sa mabilis na pag-uwi?': [
         'May immediate access ka ba sa pinakamalapit na embahada o konsulado ng Pilipinas?',
         'Alam mo ba ang mga dokumentong kailangan para sa emergency repatriation?',
-        'Kailangan mo ba ng tulong sa pag-inform sa employer mo tungkol sa iyong repatriation needs?',
-        'Gusto mo bang malaman ang support services na ibinibigay ng POLO at OWWA?'
+        'Kailangan mo ba ng tulong sa pag-inform sa employer at recruitment agency mo tungkol sa iyong repatriation?',
+        'Gusto mo bang malaman ang support services na ibinibigay ng POLO/MWO at OWWA?'
     ],
     'Sino ang pwedeng kontakin?': [
         'Nakipag-ugnayan ka na ba sa embahada o konsulado ng Pilipinas sa bansa kung nasaan ka?',
-        'Kailangan mo ba ng contact information para sa mga opisina ng POLO?',
+        'Kailangan mo ba ng contact information para sa mga opisina ng POLO/MWO?',
         'Alam mo ba ang mga NGOs na nagbibigay ng repatriation support para sa OFWs?',
         'Gusto mo bang malaman ang mga hotline o emergency contact numbers?'
     ],
     'Anong financial assistance ang available?': [
-        'Nakarehistro ka ba sa OWWA para sa repatriation benefits?',
-        'Kailangan mo ba ng impormasyon sa specific financial aid programs mula sa DFA?',
-        'Interesado ka bang malaman ang tungkol sa livelihood assistance para sa mga repatriated OFWs?',
-        'Gusto mo bang malaman ang emergency financial assistance mula sa mga NGOs?'
+        'Ikaw ba ay isang active OWWA member? (Para sa mga hindi aktibong miyembro ng OWWA maaari mong i-click ang impormasyon dito.)',
+        'Interesado ka bang malaman ang tungkol sa livelihood assistance para sa mga repatriated OFWs?'
     ],
     'Paano iayos ang pagpapadala ng gamit?': [
         'Kailangan mo ba ng rekomendasyon para sa mga maaasahang cargo at logistics companies?',
         'Alam mo ba ang mga customs regulations para sa pagpapadala ng mga gamit pabalik sa Pilipinas?',
         'Kailangan mo ba ng tulong sa dokumentasyon na kailangan para sa pagpapadala?',
-        'Naghahanap ka ba ng payo sa pag-pack at pag-secure ng mga gamit para sa shipment?'
+        'Anu-ano ang mga dapat tandaan sa pag-pack at pag-secure ng mga gamit para sa shipment?'
     ],
     'Ano ang dapat tingnan sa kontrata?': [
         'Klaro ba sa iyo ang job description at responsibilities na nakalagay sa kontrata?',
-        'Kailangan mo ba ng detalyadong breakdown ng sahod, benepisyo, at payment schedule?',
         'Alam mo ba ang working hours, rest days, at leave entitlements mo?',
         'Gusto mo bang magtanong ng legal advice sa mga terms na hindi malinaw o patas?'
     ],
     'Paano masisiguro kung legal ang kontrata?': [
-        'Na-verify na ba ng POEA ang kontrata mo?',
+        'Na-verify na ba ng POEA/ DMW ang kontrata mo?',
         'Kailangan mo ba ng tulong sa pag-confirm ng mga pirma at seal sa kontrata?',
         'Alam mo ba ang mga kinakailangang stamps para sa kontrata mo?',
-        'Gusto mo bang kumonsulta sa legal adviser para masiguradong valid ang kontrata?'
+        'Gusto mo bang kumonsulta sa legal adviser para masiguradong valid ang kontrata?',
+        'Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog? Kung gayon, mag-upload ng larawan ng iyong kontrata dito:'
     ],
     'Ano ang gagawin kung may bagong kontrata?': [
-        'Na-compare mo na ba ang mga bagong terms ng kontrata sa original na kontrata?',
+        'Na-compare mo na ba ang mga nakasaad sa bagong kontrata sa original na kontrata?',
         'Kailangan mo ba ng tulong sa pag-unawa kung bakit may bagong kontrata?',
         'Alam mo ba ang mga karapatan mo kung pinipilit kang pumirma ng bagong kontrata?',
-        'Gusto mo bang i-report ang sitwasyon sa POEA o magtanong ng legal advice?'
+        'Gusto mo bang i-report ang sitwasyon sa DMW o magtanong ng legal advice?'
     ],
     'Paano makakuha ng legal advice?': [
-        'Kailangan mo ba ng contact information para sa pinakamalapit na POLO o embahada?',
-        'Alam mo ba ang legal aid services na ibinibigay ng OWWA?',
+        'Kailangan mo ba ng contact information para sa pinakamalapit na POLO/MWO o embahada?',
+        'Alam mo ba ang legal aid services na ibinibigay ng POLO/MWO?',
+        'Alam mo ba ang legal aid services na ibinibigay ng DMW?',
+        'Na-irecord mo ba ang mga pagkakataon na hindi ka nabayaran ng tamang sahod o hindi pinasahod?',
         'Na-dokumento mo na ba ang lahat ng instances ng paglabag sa kontrata?',
         'Gusto mo bang malaman ang proseso ng pag-file ng formal na reklamo?'
     ]
