@@ -56,7 +56,9 @@ openai_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 # Documents
 
 ## CSV
-basic_qa_csv_file_path = "/workspaces/cma_app/repository/Combined_App_Draft1_QA.csv"
+# basic_qa_csv_file_path = "/workspaces/cma_app/repository/Combined_App_Draft1_QA.csv"
+basic_qa_csv_file_path = "repository/Combined_App_Draft1_QA.csv"
+
 
 ## PDF
 policy_data = [
