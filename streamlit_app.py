@@ -136,7 +136,7 @@ level3_buttons = {
         "Ano ang mga kailangan dalhin sa SENA?",
         "Pwede ba magsama ng lawyer sa SENA?"
     ],
-    'Mga Claim sa Pera': [
+    'Money Claims': [
         "Ano ang money claims?",
         "Saan ako pwede magfile ng money claims?",
         "Hindi ko natapos ang kontrata ko sa aking employer dahil sa pang aabuso. ano ang gagawin?",
