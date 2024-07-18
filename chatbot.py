@@ -65,26 +65,25 @@ def custom_chatbot(level1_button, level2_button, query):
         st.session_state.messages.append({"role": "assistant", "content": answer_content})
         i +=5
 
-    else:
-        # Create a chat input field to allow the user to enter a message. This will display
-        # automatically at the bottom of the page.
-        if prompt := st.chat_input("May tanong ka ba?"):
+    # Create a chat input field to allow the user to enter a message. This will display
+    # automatically at the bottom of the page.
+    if prompt := st.chat_input("May tanong ka ba?"):
 
-            # Store and display the current prompt.
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+        # Store and display the current prompt.
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-            # Generate a response using the OpenAI API.
-            stream = retrieve_response_with_sources(prompt)
-            answer_stream = stream.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
-            sources_stream = stream.get("sources")
-            source_documents_stream = stream.get("source_documents")
-            
-            with st.chat_message("assistant"):
-                # response = st.write_stream(stream)
-                st.markdown(answer_stream)
-            st.session_state.messages.append({"role": "assistant", "content": answer_stream})
+        # Generate a response using the OpenAI API.
+        stream = retrieve_response_with_sources(prompt)
+        answer_stream = stream.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
+        sources_stream = stream.get("sources")
+        source_documents_stream = stream.get("source_documents")
+        
+        with st.chat_message("assistant"):
+            # response = st.write_stream(stream)
+            st.markdown(answer_stream)
+        st.session_state.messages.append({"role": "assistant", "content": answer_stream})
 
 
 def wala_custom_chatbot(level1_button):
