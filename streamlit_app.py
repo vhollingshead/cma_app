@@ -187,8 +187,12 @@ def summarize_responses():
     for path in st.session_state.path:
         if path in st.session_state.responses:
             for question, answer in st.session_state.responses[path].items():
-                summary.append(f"{question}: {'Oo' if answer else 'Hindi'}")
-    return " ".join(summary)
+                if answer:
+                    summary.append(question)
+    #             summary.append(f"{question}: {'Oo' if answer else 'Hindi'}")
+    # return " ".join(summary)
+    result = "\n".join(summary)
+    return result
 
 # Custom CSS to make all buttons the same width and stack horizontally
 st.markdown("""

@@ -45,26 +45,27 @@ def custom_chatbot(level1_button, level2_button, query):
 
     # Convert the question-answer pairs with a first-person query in natural language
     if "initial_response" not in st.session_state:
-        converted_query = convert_to_first_person(level1_button, level2_button, query)
-        initial_response = retrieve_response_with_sources(converted_query)
+        # converted_query = convert_to_first_person(level1_button, level2_button, query)
+        initial_response = retrieve_response_with_sources(query)
         answer_content = initial_response.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
         sources_content = initial_response.get("sources")
         source_documents_content = initial_response.get("source_documents")
 
         # Display the initial response
         with st.chat_message("user"):
-            st.markdown(converted_query)
+            # st.markdown(converted_query)
+            st.markdown(query)
         with st.chat_message("assistant"):
             st.markdown(answer_content)
 
         # Store the initial response in session state
-        st.session_state.messages.append({"role": "user", "content": converted_query})
+        st.session_state.messages.append({"role": "user", "content": query})
         st.session_state.messages.append({"role": "assistant", "content": answer_content})
         st.session_state.initial_response = initial_response
-        st.session_state.converted_query = converted_query
+        st.session_state.query = query
     else:
         initial_response = st.session_state.initial_response
-        converted_query = st.session_state.converted_query
+        query = st.session_state.query
 
     # Create a chat input field to allow the user to enter a message. This will display
     # automatically at the bottom of the page.
@@ -102,23 +103,23 @@ def wala_custom_chatbot(level1_button):
 
     # Convert the question-answer pairs with a first-person query in natural language
     if "initial_response" not in st.session_state:
-        converted_query = f"May tanong ako tungkol sa {level1_button}."
+        query = f"May tanong ako tungkol sa {level1_button}."
         first_response = "Ano ang gusto mong malaman?"
 
         # Display the initial response
         with st.chat_message("user"):
-            st.markdown(converted_query)
+            st.markdown(query)
         with st.chat_message("assistant"):
             st.markdown(first_response)
 
         # Store the initial response in session state
-        st.session_state.messages.append({"role": "user", "content": converted_query})
+        st.session_state.messages.append({"role": "user", "content": query})
         st.session_state.messages.append({"role": "assistant", "content": first_response})
         st.session_state.initial_response = first_response
-        st.session_state.converted_query = converted_query
+        st.session_state.query = query
     else:
         first_response = st.session_state.initial_response
-        converted_query = st.session_state.converted_query
+        query = st.session_state.query
 
     # Create a chat input field to allow the user to enter a message. This will display
     # automatically at the bottom of the page.
@@ -130,17 +131,13 @@ def wala_custom_chatbot(level1_button):
             st.markdown(prompt)
 
         # Generate a response using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
+        stream = retrieve_response_with_sources(prompt)
+        answer_stream = stream.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
+        sources_stream = stream.get("sources")
+        source_documents_stream = stream.get("source_documents")
 
         # Stream the response to the chat using `st.write_stream`, then store it in 
         # session state.
         with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            st.markdown(answer_stream)
+        st.session_state.messages.append({"role": "assistant", "content": answer_stream})
