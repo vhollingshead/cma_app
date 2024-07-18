@@ -29,8 +29,8 @@ from langchain.prompts import (
 )
 
 # Set API keys
-openai_api_key = st.secrets["openai"]["api_key"]
-pinecone_api_key = st.secrets["pinecone"]["pinecone_api_key"]
+openai_api_key = st.secrets["api_key"]
+pinecone_api_key = st.secrets["pinecone_api_key"]
 os.environ['OPENAI_API_KEY'] = openai_api_key
 os.environ['PINECONE_API_KEY'] = pinecone_api_key
 

@@ -5,7 +5,7 @@ from streamlit_chat import message
 from pinecone_db import retrieve_response_with_sources
 
 # Access the OpenAI API key
-openai_api_key = st.secrets["openai"]["api_key"]
+openai_api_key = st.secrets["api_key"]
 
 def convert_to_first_person(level1_button, level2_button, qa_string):
     # Convert question-answer pairs to a first-person narrative

@@ -5,7 +5,7 @@ import requests
 from chatbot import *
 
 # Access the OpenAI API key
-api_key = st.secrets["openai"]["api_key"]
+api_key = st.secrets["api_key"]
 openai_api_key = api_key
 
 # Function to encode the image
