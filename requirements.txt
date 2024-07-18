@@ -4,7 +4,7 @@ langchain_huggingface
 langchain
 langchain_community
 pinecone
-langchain_pinecone
+langchain-pinecone
 streamlit_chat
 pydf
 lark
