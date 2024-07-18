@@ -150,8 +150,8 @@ basic_qa_chunks = get_chunks('csv', basic_qa_csv_file_path)
 explore_documents(basic_qa_chunks)
 chunks += basic_qa_chunks
 
-pdf_basic_qa_chunks = get_chunks('pdf', policy_df)
-chunks += pdf_basic_qa_chunks
+# pdf_basic_qa_chunks = get_chunks('pdf', policy_df)
+# chunks += pdf_basic_qa_chunks
 
 vectorstore_from_docs = PineconeVectorStore.from_documents(
         chunks,
