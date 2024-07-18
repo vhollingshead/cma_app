@@ -29,7 +29,7 @@ def convert_to_first_person(level1_button, level2_button, qa_string):
     answer = response.choices[0].message.content
     return answer
 
-def custom_chatbot(level1_button, level2_button, query, openai_api_key):
+def custom_chatbot(level1_button, level2_button, query):
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
@@ -86,9 +86,9 @@ def custom_chatbot(level1_button, level2_button, query, openai_api_key):
         st.session_state.messages.append({"role": "assistant", "content": answer_stream})
 
 
-def wala_custom_chatbot(level1_button, openai_api_key):
+def wala_custom_chatbot(level1_button):
     # Create an OpenAI client.
-    client = openai.OpenAI(api_key=openai_api_key)
+    client = OpenAI(api_key=openai_api_key)
 
     # Create a session state variable to store the chat messages. This ensures that the
     # messages persist across reruns.
