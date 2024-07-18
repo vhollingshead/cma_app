@@ -30,6 +30,7 @@ def convert_to_first_person(level1_button, level2_button, qa_string):
     return answer
 
 def custom_chatbot(level1_button, level2_button, query):
+    i = 0
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
@@ -43,44 +44,47 @@ def custom_chatbot(level1_button, level2_button, query):
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Convert the question-answer pairs with a first-person query in natural language
-    converted_query = convert_to_first_person(level1_button, level2_button, query)
-    # print(converted_query)
+    if i < 5: 
+        # Convert the question-answer pairs with a first-person query in natural language
+        converted_query = convert_to_first_person(level1_button, level2_button, query)
+        # print(converted_query)
 
-    # Get response from chatbot based on initial input
+        # Get response from chatbot based on initial input
 
-    initial_response = retrieve_response_with_sources(converted_query)
-    answer_content = initial_response.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
-    sources_content = initial_response.get("sources")
-    source_documents_content = initial_response.get("source_documents")
-    with st.chat_message("user"):
-            st.markdown(converted_query)
-
-    with st.chat_message("assistant"):
-        st.markdown(answer_content)
-
-    st.session_state.messages.append({"role": "user", "content": converted_query})
-    st.session_state.messages.append({"role": "assistant", "content": answer_content})
-
-    # Create a chat input field to allow the user to enter a message. This will display
-    # automatically at the bottom of the page.
-    if prompt := st.chat_input("May tanong ka ba?"):
-
-        # Store and display the current prompt.
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        initial_response = retrieve_response_with_sources(converted_query)
+        answer_content = initial_response.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
+        sources_content = initial_response.get("sources")
+        source_documents_content = initial_response.get("source_documents")
         with st.chat_message("user"):
-            st.markdown(prompt)
+                st.markdown(converted_query)
 
-        # Generate a response using the OpenAI API.
-        stream = retrieve_response_with_sources(prompt)
-        answer_stream = stream.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
-        sources_stream = stream.get("sources")
-        source_documents_stream = stream.get("source_documents")
-        
         with st.chat_message("assistant"):
-            # response = st.write_stream(stream)
-            st.markdown(answer_stream)
-        st.session_state.messages.append({"role": "assistant", "content": answer_stream})
+            st.markdown(answer_content)
+
+        st.session_state.messages.append({"role": "user", "content": converted_query})
+        st.session_state.messages.append({"role": "assistant", "content": answer_content})
+        i +=5
+
+    else:
+        # Create a chat input field to allow the user to enter a message. This will display
+        # automatically at the bottom of the page.
+        if prompt := st.chat_input("May tanong ka ba?"):
+
+            # Store and display the current prompt.
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Generate a response using the OpenAI API.
+            stream = retrieve_response_with_sources(prompt)
+            answer_stream = stream.get("answer", "Hindi ko alam ang sagot sa tanong na ito. Direktang makipag-ugnayan sa Center for Migrant Advocacy para sa tulong.")
+            sources_stream = stream.get("sources")
+            source_documents_stream = stream.get("source_documents")
+            
+            with st.chat_message("assistant"):
+                # response = st.write_stream(stream)
+                st.markdown(answer_stream)
+            st.session_state.messages.append({"role": "assistant", "content": answer_stream})
 
 
 def wala_custom_chatbot(level1_button):
