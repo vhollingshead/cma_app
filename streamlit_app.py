@@ -1,7 +1,52 @@
 import streamlit as st
 import base64
 from PIL import Image
-# from chatbot import *
+import requests
+from chatbot import *
+
+# Access the OpenAI API key
+api_key = st.secrets["openai"]["api_key"]
+openai_api_key = api_key
+
+# Function to encode the image
+def encode_image(image_path):
+  with open(image_path, "rb") as image_file:
+    return base64.b64encode(image_file.read()).decode('utf-8')
+
+def gpt4o_chatbot(base64_image):
+    # Getting the base64 string
+    # base64_image = encode_image(image_path)
+
+    headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {api_key}"
+    }
+
+    payload = {
+    "model": "gpt-4o",
+    "messages": [
+        {
+        "role": "user",
+        "content": [
+            {
+            "type": "text",
+            "text": "Translate this text into Tagalog."
+            },
+            {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{base64_image}"
+            }
+            }
+        ]
+        }
+    ],
+    "max_tokens": 300
+    }
+
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+
+    print(response.json())
 
 # Function to get base64 of the image
 def get_base64_of_bin_file(bin_file):
@@ -25,133 +70,88 @@ st.markdown(f"""
 
 st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
 
-level1_buttons = ['Pre-Deployment', 'Wages', 'Repatriation', 'Contract']
+# Define the buttons for each level
+level1_buttons = ['Pre-Deployment', 'Sahod o Wages', 'Repatriation']
 level2_buttons = {
-    'Pre-Deployment': [
-        'Ano ang mga kinakailangang dokumento?',
-        'Paano ako makakadalo sa PDOS?',
-        'Ano ang mga medical tests?',
-        'May specific na training programs ba?',
-        'Wala dito ang tanong ko.'
-    ],
-    'Wages': [
-        'Paano masisiguro ang tamang sahod?',
-        'Ano ang gagawin kung delayed ang sahod ko?',
-        'Paano i-report ang mga hindi nabayaran na sahod?',
-        'May legal protections ba para sa wage theft o hindi tamang pagpapasahod?',
-        'Wala dito ang tanong ko.'
-    ],
-    'Repatriation': [
-        'Ano ang mga hakbang para sa mabilis na pag-uwi?',
-        'Sino ang pwedeng kontakin?',
-        'Anong financial assistance ang available?',
-        'Paano iayos ang pagpapadala ng gamit?',
-        'Wala dito ang tanong ko.'
-    ],
-    'Contract': [
-        'Ano ang dapat tingnan sa kontrata?',
-        'Paano masisiguro kung legal ang kontrata?',
-        'Ano ang gagawin kung may bagong kontrata?',
-        'Paano makakuha ng legal advice?',
-        'Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?',
-        'Wala dito ang tanong ko.'
-    ]
+    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbabalik at Karagdagang Impormasyon', 'Oriyantrasyon at Sertipikasyon', 'Wala dito ang tanong ko.'],
+    'Sahod o Wages': ['Pangkalahatang Impormasyon', 'Pag-aabuso at Pag-uulat', 'Kompensasyon at Mga Benepisyo', 'Embassy at Tulong', 'Wala dito ang tanong ko.'],
+    'Repatriation': ['Pagpapauwi at Mga Reklamo', 'Mga Proseso ng SENA', 'Money Claims', 'Saklaw ng Seguro', 'Embassy at Tulong', 'Serbisyo at Membership ng OWWA', 'Wala dito ang tanong ko.']
 }
 
 level3_buttons = {
-    'Ano ang mga kinakailangang dokumento?': [
-        'Mayroon ka na bang valid na passport, o kailangan mo ng tulong sa pag-aapply?',
-        'Kailangan mo ba ng gabay para makakuha ng Overseas Employment Certificate (OEC)?',
-        'Alam mo ba ang mga specific na visa requirements para sa bansang pupuntahan mo?',
-        'Kailangan mo ba ng tulong para ma-verify ang kontrata mo sa POEA?'
+    'Paghahanap ng Trabaho at Ahensya': [
+        "Saan pwede maghanap ng trabaho sa Saudi Arabia?",
+        "Paano malalaman kung legit ang recruitment agency?",
+        "Ano ang PESO?",
+        "Saan ang opisina ng OWWA?",
+        "Saan ang opisina ng DMW?",
+        "Saan ang opisina ng DFA?"
     ],
-    'Paano ako makakadalo sa PDOS?': [
-        'Ano ang mga dapat kong malaman tungkol sa PDOS?',
-        'Gusto mo bang malaman ang pinakamalapit na lokasyon ng PDOS?',
-        'Kailangan mo ba ng tulong sa mga dokumentong kailangan para makadalo sa PDOS?',
-        'Interesado ka ba sa online PDOS dahil sa lokasyon mo?'
+    'Mga Kontrata at Mga Kailangan': [
+        "Gaano katagal ang kontrata sa Saudi Arabia?",
+        "Ano ang mga requirements na kailangan na ipasa sa recruitment agency?",
+        "Aling mga dokumento ang dapat isumite para sa pagproseso at dokumentasyon ng kontrata ng mga bagong hire?",
+        "Aling mga dokumento ang dapat isumite para sa pagproseso at dokumentasyon ng kontrata ng mga bagong upahang kasambahay?"
     ],
-    'Ano ang mga medical tests?': [
-        'Anu-ano ang mga accredited clinics ng Department of Health at Department of Migrant Workers? (Maaari ka ring magtanong sa recruitment agency mo)',
-        'Anu-ano ang mga medical requirements?'
+    'Sahod at Kompensasyon': [
+        "Magkano ang sahod ng domestic worker sa Saudi Arabia?",
+        "Magkano ang sahod isang OFW sa Saudi Arabia?"
     ],
-    'May specific na training programs ba?': [
-        'Anu-ano ang skill trainings ang kailangan mo para sa trabaho mo sa ibang bansa?',
-        'Kailangan mo ba ng language training?',
-        'Gusto mo bang malaman kung saan makakahanap ng cultural orientation programs?',
-        'Interesado ka ba sa safety at security training na kaugnay sa trabaho mo?'
+    'Pagbabalik at Karagdagang Impormasyon': [
+        "Pwede ba bumalik kapag natapos ang kontrata?",
+        "Saan ako maaaring pumunta para sa karagdagang impormasyon?"
     ],
-    'Paano masisiguro ang tamang sahod?': [
-        'Kailangan mo ba ng tulong sa pag-unawa sa mga detalye ng sahod sa kontrata mo?',
-        'Kailangan mo ba ng payo kung paano itago ang mga natatanggap mong sahod?',
-        'Hindi ka ba nababayaran ng tamang sahod at sa tamang panahon?',
-        'Gusto mo bang malaman ang mga hakbang kung sa tingin mo ay hindi tama ang pagpapasahod sayo?'
+    'Oriyantrasyon at Sertipikasyon': [
+        "Ano ang PDOS?",
+        "Kailangan mo ba ng gabay para makakuha ng Overseas Employment Certificate (OEC)?"
     ],
-    'Ano ang gagawin kung delayed ang sahod ko?': [
-        'Sinubukan mo na bang kausapin ang amo o employer mo tungkol dito?',
-        'Alam mo ba ang local labor laws tungkol sa tamang pagbabayad ng sahod?',
-        'Kailangan mo ba ng tulong sa pag-record ng mga sahod mo na hindi nabayaran ng employer mo?',
-        'Gusto mo bang malaman kung paano magsumbong sa POLO/MWO?'
+    'Pangkalahatang Impormasyon': [
+        "Ano ang iqama?",
+        "Ano ang PAOS?",
+        "Ano ang ibig sabihin ng khadama?",
+        "Ano ang ibig sabihin ng quit claim?",
+        "Ano ang ibig sabihin ng SENA?"
     ],
-    'Paano i-report ang mga hindi nabayaran na sahod?': [
-        'Nakalap mo na ba ang lahat ng kinakailangang ebidensya tulad ng pay slips at kontrata?',
-        'Alam mo ba ang proseso ng pag-report sa POLO/MWO?',
-        'Kailangan mo ba ng gabay sa paggamit ng online platforms para mag-file ng reklamo?',
-        'Naghahanap ka ba ng mga local organizations na pwedeng tumulong sa kaso mo?'
+    'Pag-aabuso at Pag-uulat': [
+        "Inaabuso po ako ng amo ko, saan po pwedeng humingi ng tulong?",
+        "Saan pwede magreport kung hindi binibigay ng amo ko ang sahod ko?",
+        "Sarado na po ang agency ko sa pinas, sino po ang maaaring ireklamo?",
+        "Undocumented po ako paano po ako makakahingi ng tulong?"
     ],
-    'May legal protections ba para sa wage theft o hindi tamang pagpapasahod?': [
-        'Gusto mo bang malaman ang mga specific na karapatan sa ilalim ng Migrant Workers Act (RA 8042)?',
-        'Interesado ka bang malaman ang mga legal remedies sa bansa kung saan ka nagtatrabaho?',
-        'Kailangan mo ba ng contacts para sa labor attachés o legal aid services?',
-        'Alam mo ba ang proseso ng pag-file ng money claims para sa wage theft?'
+    'Kompensasyon at Mga Benepisyo': [
+        "Sabi ng amo ko at agency dito, na dapat ko daw bayaran ang plane ticket ko, tama po ba ito?",
+        "Sino ang magbabayad para sa aking airfare kung ako ay terminate?",
+        "Hindi ako binibigyan ng pagkain ng amo ko, ang food allowance ba ay included sa kontrata?"
     ],
-    'Ano ang mga hakbang para sa mabilis na pag-uwi?': [
-        'May immediate access ka ba sa pinakamalapit na embahada o konsulado ng Pilipinas?',
-        'Alam mo ba ang mga dokumentong kailangan para sa emergency repatriation?',
-        'Kailangan mo ba ng tulong sa pag-inform sa employer at recruitment agency mo tungkol sa iyong repatriation?',
-        'Gusto mo bang malaman ang support services na ibinibigay ng POLO/MWO at OWWA?'
+    'Embassy at Tulong': [
+        "Saan ang embassy at MWO/POLO?",
+        "May immediate access ka ba sa pinakamalapit na embahada o konsulado ng Pilipinas?",
+        "Kailangan mo ba ng contact information para sa mga opisina ng MWO?"
     ],
-    'Sino ang pwedeng kontakin?': [
-        'Nakipag-ugnayan ka na ba sa embahada o konsulado ng Pilipinas sa bansa kung nasaan ka?',
-        'Kailangan mo ba ng contact information para sa mga opisina ng POLO/MWO?',
-        'Alam mo ba ang mga NGOs na nagbibigay ng repatriation support para sa OFWs?',
-        'Gusto mo bang malaman ang mga hotline o emergency contact numbers?'
+    'Pagpapauwi at Mga Reklamo': [
+        "Nakauwi na po ako pinas, paano mag-file ng reklamo sa akin recruitment agency?"
     ],
-    'Anong financial assistance ang available?': [
-        'Ikaw ba ay isang active OWWA member? (Para sa mga hindi aktibong miyembro ng OWWA maaari mong i-click ang impormasyon dito.)',
-        'Interesado ka bang malaman ang tungkol sa livelihood assistance para sa mga repatriated OFWs?'
+    'Mga Proseso ng SENA': [
+        "Ano ang SENA?",
+        "Ano ang mga kailangan dalhin sa SENA?",
+        "Pwede ba magsama ng lawyer sa SENA?"
     ],
-    'Paano iayos ang pagpapadala ng gamit?': [
-        'Kailangan mo ba ng rekomendasyon para sa mga maaasahang cargo at logistics companies?',
-        'Alam mo ba ang mga customs regulations para sa pagpapadala ng mga gamit pabalik sa Pilipinas?',
-        'Kailangan mo ba ng tulong sa dokumentasyon na kailangan para sa pagpapadala?',
-        'Anu-ano ang mga dapat tandaan sa pag-pack at pag-secure ng mga gamit para sa shipment?'
+    'Mga Claim sa Pera': [
+        "Ano ang money claims?",
+        "Saan ako pwede magfile ng money claims?",
+        "Hindi ko natapos ang kontrata ko sa aking employer dahil sa pang aabuso. ano ang gagawin?",
+        "Ano ang proseso sa pagfile ng money claims sa NLRC?",
+        "Ano ang prescriptive period ng money claims?",
+        "Ano ang joint and solidary liability?"
     ],
-    'Ano ang dapat tingnan sa kontrata?': [
-        'Klaro ba sa iyo ang job description at responsibilities na nakalagay sa kontrata?',
-        'Alam mo ba ang working hours, rest days, at leave entitlements mo?',
-        'Gusto mo bang magtanong ng legal advice sa mga terms na hindi malinaw o patas?'
+    'Saklaw ng Seguro': [
+        "Ano ang Compulsory Insurance Coverage for Agency-Hired Migrant Workers?",
+        "Sino ang sakop ng Agency-Hired OFW Compulsory Insurance?",
+        "Ano-ano ang mga benefits at coverages ng Agency-Hired OFW Compulsory Insurance?"
     ],
-    'Paano masisiguro kung legal ang kontrata?': [
-        'Na-verify na ba ng POEA/ DMW ang kontrata mo?',
-        'Kailangan mo ba ng tulong sa pag-confirm ng mga pirma at seal sa kontrata?',
-        'Alam mo ba ang mga kinakailangang stamps para sa kontrata mo?',
-        'Gusto mo bang kumonsulta sa legal adviser para masiguradong valid ang kontrata?',
-        'Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog? Kung gayon, mag-upload ng larawan ng iyong kontrata dito:'
-    ],
-    'Ano ang gagawin kung may bagong kontrata?': [
-        'Na-compare mo na ba ang mga nakasaad sa bagong kontrata sa original na kontrata?',
-        'Kailangan mo ba ng tulong sa pag-unawa kung bakit may bagong kontrata?',
-        'Alam mo ba ang mga karapatan mo kung pinipilit kang pumirma ng bagong kontrata?',
-        'Gusto mo bang i-report ang sitwasyon sa DMW o magtanong ng legal advice?'
-    ],
-    'Paano makakuha ng legal advice?': [
-        'Kailangan mo ba ng contact information para sa pinakamalapit na POLO/MWO o embahada?',
-        'Alam mo ba ang legal aid services na ibinibigay ng POLO/MWO?',
-        'Alam mo ba ang legal aid services na ibinibigay ng DMW?',
-        'Na-irecord mo ba ang mga pagkakataon na hindi ka nabayaran ng tamang sahod o hindi pinasahod?',
-        'Na-dokumento mo na ba ang lahat ng instances ng paglabag sa kontrata?',
-        'Gusto mo bang malaman ang proseso ng pag-file ng formal na reklamo?'
+    'Serbisyo at Membership ng OWWA': [
+        "Gusto mo bang malaman ang support services na ibinibigay ng OWWA?",
+        "Ikaw ba ay isang active OWWA member?"
     ]
 }
 
@@ -189,28 +189,6 @@ def summarize_responses():
             for question, answer in st.session_state.responses[path].items():
                 summary.append(f"{question}: {'Oo' if answer else 'Hindi'}")
     return " ".join(summary)
-
-# # Define button sets for each level
-# level1_buttons = ['Pre-Deployment', 'Wages', 'Repatriation', 'Wala dito ang tanong ko']
-# level2_buttons = {
-#     'Pre-Deployment': ['Sub-topic 1A', 'Sub-topic 1B', 'Sub-topic 1C', 'Sub-topic 1D', 'Wala dito ang tanong ko'],
-#     'Wages': ['Sub-topic 2A', 'Sub-topic 2B', 'Sub-topic 2C', 'Sub-topic 2D', 'Wala dito ang tanong ko'],
-#     'Repatriation': ['Sub-topic 3A', 'Sub-topic 3B', 'Sub-topic 3C', 'Sub-topic 3D', 'Wala dito ang tanong ko']
-# }
-# level3_buttons = {
-#     'Sub-topic 1A': ['Detail 1A1', 'Detail 1A2', 'Detail 1A3', 'Detail 1A4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 1B': ['Detail 1B1', 'Detail 1B2', 'Detail 1B3', 'Detail 1B4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 1C': ['Detail 1C1', 'Detail 1C2', 'Detail 1C3', 'Detail 1C4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 1D': ['Detail 1D1', 'Detail 1D2', 'Detail 1D3', 'Detail 1D4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 2A': ['Detail 2A1', 'Detail 2A2', 'Detail 2A3', 'Detail 2A4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 2B': ['Detail 2B1', 'Detail 2B2', 'Detail 2B3', 'Detail 2B4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 2C': ['Detail 2C1', 'Detail 2C2', 'Detail 2C3', 'Detail 2C4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 2D': ['Detail 2D1', 'Detail 2D2', 'Detail 2D3', 'Detail 2D4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 3A': ['Detail 3A1', 'Detail 3A2', 'Detail 3A3', 'Detail 3A4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 3B': ['Detail 3B1', 'Detail 3B2', 'Detail 3B3', 'Detail 3B4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 3C': ['Detail 3C1', 'Detail 3C2', 'Detail 3C3', 'Detail 3C4', 'Wala dito ang tanong ko'],
-#     'Sub-topic 3D': ['Detail 3D1', 'Detail 3D2', 'Detail 3D3', 'Detail 3D4', 'Wala dito ang tanong ko']
-# }
 
 # Custom CSS to make all buttons the same width and stack horizontally
 st.markdown("""
@@ -269,62 +247,55 @@ elif st.session_state.level == 2:
                     st.session_state.level = 5
                 elif button == "Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?":
                     st.session_state.level = 6
+                elif button == "Ano ang mga medical tests?":
+                    st.session_state.level = 7
                 else:
                     st.session_state.path.append(button)
                     st.session_state.level = 3
                 st.rerun()
-        if st.button("Balik"):
+        if st.button("Back"):
             back()
             st.rerun()
 elif st.session_state.level == 3:
     sub_topic = st.session_state.path[1]
     if sub_topic in level3_buttons:
-        st.header(f"Piliin kung 'Oo':")
+        st.header(f"Pumili ng mga tanong:")
         st.session_state.responses[sub_topic] = get_yes_no_responses(level3_buttons[sub_topic])
 
         if st.button("Ask AI Assistant"):
             st.session_state.forward_query = summarize_responses()
-            st.session_state.level = 5
+            st.session_state.level = 4
             st.rerun()
             # st.write("Generated Query: ", st.session_state.forward_query)
-        if st.button("Balik"):
+        if st.button("Back"):
             back()
             st.rerun()
-elif st.session_state.level == 4:
-    if st.button("Balik sa Simula"):
-        st.session_state.level = 1
-        st.session_state.path = []
-        st.session_state.responses = {}
-        st.session_state.forward_query = ""
-        st.rerun()
-    # custom_chatbot()
-    st.header("Chatbot")
-    st.text_input("Ano ang iyong tanong?", key="user_question")
-    if st.button("Isumite"):
-        st.write(f"Salamat sa iyong tanong: {st.session_state.user_question}")
-    
 
-elif st.session_state.level == 5:
+elif st.session_state.level == 4:
+    main_topic = st.session_state.path[0]
+    sub_topic = st.session_state.path[1]
+    custom_chatbot(main_topic, sub_topic, summarize_responses())
     if st.button("Balik sa Simula"):
         st.session_state.level = 1
         st.session_state.path = []
         st.session_state.responses = {}
         st.session_state.forward_query = ""
+        st.session_state.messages = []
         st.rerun()
-    # custom_chatbot()
-    st.header("Chatbot (Not Yet Functional)")
-    # st.text_input("You asked: " + str(st.session_state.forward_query), key="user_question")
-    st.text_input(" ", key="user_question")
-    if st.button("Isumite"):
-        st.write(f"Salamat sa iyong tanong: {st.session_state.user_question}")
+    
+elif st.session_state.level == 5:
+    main_topic = st.session_state.path[0]
+    wala_custom_chatbot(main_topic)
+    if st.button("Balik sa Simula"):
+        st.session_state.level = 1
+        st.session_state.path = []
+        st.session_state.responses = {}
+        st.session_state.forward_query = ""
+        st.session_state.messages = []
+        st.rerun()
+    
     
 elif st.session_state.level == 6: 
-    if st.button("Balik sa Simula"):
-        st.session_state.level = 1
-        st.session_state.path = []
-        st.session_state.responses = {}
-        st.session_state.forward_query = ""
-        st.rerun()  
     # Title of the app
     st.title("Contract Upload")
     st.write("Mag-upload ng larawan ng iyong kontrata dito:")
@@ -335,20 +306,32 @@ elif st.session_state.level == 6:
     if uploaded_file is not None:
         # To read file as bytes:
         bytes_data = uploaded_file.read()
-        
+
         # Display the image
         image = Image.open(uploaded_file)
         st.image(image, caption='Uploaded Image.', use_column_width=True)
         st.write("")
         st.write("Malaki!")
 
-        # # Optionally, save the uploaded file to disk
-        # with open(f"uploaded_image_{uploaded_file.name}", "wb") as f:
-        #     f.write(bytes_data)
-        #     # st.write("Image saved.")
-    else:
-        st.write("Wala pang na-upload na larawan.")
+    if st.button("Balik sa Simula"):
+        st.session_state.level = 1
+        st.session_state.path = []
+        st.session_state.responses = {}
+        st.session_state.forward_query = ""
+        st.session_state.messages = []
+        st.rerun() 
 
+elif st.session_state.level == 7:
+    st.header("<< CMA is not a medical provider and cannot give medical advice... >>")
+    st.write("Medical Test FAQ Here")
+    st.write("(Team to update)")
+    if st.button("Balik sa Simula"):
+        st.session_state.level = 1
+        st.session_state.path = []
+        st.session_state.responses = {}
+        st.session_state.forward_query = ""
+        st.session_state.messages = []
+        st.rerun()
 
 ### Sidebar
 
@@ -358,7 +341,7 @@ with st.sidebar:
     # st.divider()
 
     with st.expander("Sino si CMA?"):
-        st.caption("The Center for Migrant Advocacy – Philippines is an advocacy group that promotes the rights of overseas Filipinos, land or sea-based migrant workers, Filipino immigrants and their families. The center helps to improve the economic, social and political conditions of migrant Filipino families everywhere through policy advocacy, information dissemination, networking, capability-building and direct assistance.")
+        st.caption("Ang Center for Migrant Advocacy – Philippines ay isang advocacy group na nagtataguyod ng mga karapatan ng mga overseas Filipinos, land or sea-based migrant workers, Filipino immigrants at kanilang mga pamilya. Tumutulong ang center na mapabuti ang kalagayang pang-ekonomiya, panlipunan at pampulitika ng mga migranteng pamilyang Pilipino saanman sa pamamagitan ng pagtataguyod ng patakaran, pagpapakalat ng impormasyon, networking, pagbuo ng kakayahan at direktang tulong.")
 
     with st.expander("Bakit mahalaga ang AI Assistant na ito?"):
         st.caption("Ang Center for Migrant Advocacy ay nag-aanyaya sa pakikipagtulungan at puna upang pinuhin at i-optimize ang solusyon na ito, na tinitiyak na epektibong natutugunan nito ang magkakaibang pangangailangan ng mga OFW. Ang session na ito ay naglalayon na mangalap ng mahalagang feedback mula sa dati at kasalukuyang mga OFW upang pinuhin ang disenyo at functionality ng AI assistant. Napakahalaga ng ganitong mga pananaw habang nagsisikap ang CMA na magkaroon ng makabuluhang epekto sa buhay ng mga OFW sa pamamagitan ng makabagong teknolohiya. Inaasahan namin ang iyong pakikilahok at mga kontribusyon habang tinutuklasan namin ang mga posibilidad ng pagbabagong inisyatiba na ito.")
@@ -366,4 +349,4 @@ with st.sidebar:
     with st.expander("Privacy Disclaimer"):
         st.caption("Ang AI Assistant na ito ay naglalayong magbigay ng makatotohanang impormasyon tungkol sa iyong sitwasyon at hindi pa kumukolekta ng iyong personal na impormasyon. Ginagamit namin ang impormasyong ito upang maunawaan ang iba't ibang sitwasyon ng mga OFW at kanilang mga pamilya at kung paano sumangguni sa gobyerno o iba pang NGO tungkol sa iyong sitwasyon o problema. Maaari kang makipag-usap sa isang case manager pagkatapos gamitin ang AI Assistant na ito.")
 
-    st.caption('<p style="text-align:center">Made with ❤️ by CMA</p>', unsafe_allow_html=True)
+    st.caption('<p style="text-align:center">For other inquiries, please email us at: cma@cmaphils.net </p>', unsafe_allow_html=True)

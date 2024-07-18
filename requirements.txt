@@ -1,2 +1,9 @@
 streamlit
 openai
+langchain_huggingface
+langchain
+langchain_community
+pinecone
+streamlit_chat
+pydf
+lark
