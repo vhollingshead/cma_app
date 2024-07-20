@@ -57,23 +57,23 @@ openai_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 ## CSV
 # basic_qa_csv_file_path = "/workspaces/cma_app/repository/Combined_App_Draft1_QA.csv"
-basic_qa_csv_file_path = "repository/Combined_App_Draft1_QA.csv"
+basic_qa_csv_file_path = "repository/translated_responses.csv"
 
 
-## PDF
-policy_data = [
-    ("Kingdom of Saudi Arabia",
-     "Saudi Labor Law",
-     "https://www.hrsd.gov.sa/sites/default/files/2017-05/LABOR%20LAW.pdf"
-     ),
-    ("Department of Migrant Workers",
-     "Direct Hiring FAQs",
-     "https://dmw.gov.ph/resources/dsms/DMW/Externals/2022/FAQ-POPS-DIRECT.pdf",
-    ),]
+# ## PDF
+# policy_data = [
+#     ("Kingdom of Saudi Arabia",
+#      "Saudi Labor Law",
+#      "https://www.hrsd.gov.sa/sites/default/files/2017-05/LABOR%20LAW.pdf"
+#      ),
+#     ("Department of Migrant Workers",
+#      "Direct Hiring FAQs",
+#      "https://dmw.gov.ph/resources/dsms/DMW/Externals/2022/FAQ-POPS-DIRECT.pdf",
+#     ),]
 
-columns = ["source", "title", "url"]
+# columns = ["source", "title", "url"]
 
-policy_df = pd.DataFrame(policy_data, columns=columns)
+# policy_df = pd.DataFrame(policy_data, columns=columns)
 
 # Document Chunking
 
@@ -93,7 +93,7 @@ def get_chunks(type, file_or_policy_path, chunk_size=2000, chunk_overlap=500):
     for document in documents:
       metadata = document.metadata
       metadata["Main_Topic"] = first_item
-      metadata["Sub_Topic_Question"] = second_item
+      metadata["Sub_Topic"] = second_item
 
   else:
     for row in file_or_policy_path.itertuples(index=False):
@@ -153,68 +153,102 @@ chunks += basic_qa_chunks
 # pdf_basic_qa_chunks = get_chunks('pdf', policy_df)
 # chunks += pdf_basic_qa_chunks
 
-vectorstore_from_docs = PineconeVectorStore.from_documents(
-        chunks,
-        index_name=index_name,
-        embedding=embeddings_model,
-        namespace="cma-app_docs"
-    ) 
+# vectorstore_from_docs = PineconeVectorStore.from_documents(
+#         chunks,
+#         index_name=index_name,
+#         embedding=embeddings_model,
+#         namespace="cma-app_docs"
+#     ) 
 
-# check database size
-print("Index Stats 2:")
+# # check database size
+# print("Index Stats 2:")
 index.describe_index_stats()
 
 handler = StdOutCallbackHandler()
 
 metadata_field_info = [
+    # AttributeInfo(
+    #     name="source",
+    #     description="The organization or source that created the document.",
+    #     type="string or list[string]",
+    # ),
+    # AttributeInfo(
+    #     name="title",
+    #     description="The title of the document",
+    #     type="string",
+    # ),
+    # AttributeInfo(
+    #     name="url",
+    #     description="The url for the document",
+    #     type="string",
+    # ),
     AttributeInfo(
-        name="source",
-        description="The organization or source that created the document.",
-        type="string or list[string]",
-    ),
-    AttributeInfo(
-        name="title",
-        description="The title of the document",
+        name="Main_Topic",
+        description="Main topic",
         type="string",
     ),
     AttributeInfo(
-        name="url",
-        description="The url for the document",
+        name="Sub_Topic",
+        description="Sub-topic under main",
         type="string",
     ),
 ]
 document_content_description = "A policy"
 
+# Define the system and human message templates
+system_prompt = [
+    {"role": "system", "content": "You are a case manager helping overseas Filipino workers in Saudi Arabia understand the Philippine judicial process. Refine your responses so that they are in everyday Tagalog and easy to understand. If you don't know an answer, refer the user to the Center for Migrant Advocacy."}
+]
+
+human_prompt = [
+    {"role": "user", "content": "Q: {question}\nA:"}
+]
+
+system_template = SystemMessagePromptTemplate(prompt=system_prompt)
+human_template = HumanMessagePromptTemplate(prompt=human_prompt)
+
 retriever = SelfQueryRetriever.from_llm(
   llm=openai_llm,
-  vectorstore = vectorstore_from_docs,
+  vectorstore = vectorstore,
   document_contents=document_content_description,
   metadata_field_info=metadata_field_info,
   verbose=True,
   enable_limit=True) 
 
-def similarity_search(query):
-  vectorstore_from_docs.similarity_search(  
-      query,  # our search query  
-      k=3  # return 3 most relevant docs  
-  ) 
-  return 
+# Create the ChatPromptTemplate with placeholders for metadata
+chat_prompt = ChatPromptTemplate(
+    messages=[
+        system_template,
+        MessagesPlaceholder(variable_name="chat_history"),
+        human_template
+    ]
+)
 
-# Define the system and human message templates
-# system_msg_template = SystemMessagePromptTemplate.from_template(" ")
-# human_msg_template = HumanMessagePromptTemplate.from_template("{query}")
+csv_file_path = 'chat_history.csv'
 
-# # Combine them into a chat prompt template
-# prompt = ChatPromptTemplate.from_messages([system_msg_template, MessagesPlaceholder(variable_name="history"), human_msg_template])
+if not os.path.exists(csv_file_path):
+    with open(csv_file_path, 'w') as f:
+        f.write('Main_Topic, Sub_Topic, question,response\n')
 
-from langchain_core.prompts import PromptTemplate
-template = """You are a case manager helping overseas Filipino workers in Saudi Arabia understand the Philipinnes judicial process. Refine your responses so that they are in everyday Tagalog and easy to understand. If you don't know an answer refer the user to the Center for Migrant Advocacy.
+def append_to_csv(question, response, metadata):
+    metadata_values = ",".join(f'"{value}"' for value in metadata.values())
+    with open(csv_file_path, 'a') as f:
+        f.write(f'{metadata_values}, "{question}","{response}"\n')
 
-Your Response: {response}
-
-New Response: """
-
-prompt = PromptTemplate(template=template, input_variables=["response"])
+# def chat_with_self_query_retriever(user_question, metadata, chat_history=None):
+def chat_with_self_query_retriever(user_question, chat_history=None):
+    chat_history = chat_history or []
+    # Format the metadata into the prompt
+    # metadata_str = "\n".join(f"{key}: {value}" for key, value in metadata.items())
+    prompt = chat_prompt.format_prompt(question=user_question, chat_history=chat_history)
+    # full_prompt = f"{metadata_str}\n\n{prompt.to_text()}"
+    # response = self_query_retriever.run(input_text=full_prompt)
+    response = self_query_retriever.run(input_text=prompt)
+    chat_history.append((user_question, response))
+    # Save the chat history to CSV
+    # append_to_csv(user_question, response, metadata)
+    append_to_csv(user_question, response)
+    return response, chat_history
 
 def retrieve_response(query):
   qa = RetrievalQA.from_chain_type(

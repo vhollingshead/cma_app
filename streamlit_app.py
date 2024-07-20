@@ -2,7 +2,9 @@ import streamlit as st
 import base64
 from PIL import Image
 import requests
-from chatbot import *
+from chatbot import custom_chatbot_intro, wala_custom_chatbot_intro
+
+print("DEVELOPER NOTE: Sprinkle 00")
 
 # Access the OpenAI API key
 api_key = st.secrets["api_key"]
@@ -67,8 +69,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # # <h1 style="margin-bottom: 5px;">Center for Migrant Advocacy<br>AI Assistant 🤖</h1>
-
-st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
 
 # Define the buttons for each level
 level1_buttons = ['Pre-Deployment', 'Sahod o Wages', 'Repatriation']
@@ -154,7 +154,12 @@ level3_buttons = {
         "Ikaw ba ay isang active OWWA member?"
     ]
 }
-
+print("DEVELOPER NOTE: Sprinkle 0")
+if 'level' in st.session_state:
+    print("The session state level is:", st.session_state.level)
+    print("The session state step is:", st.session_state.step)
+if 'step' not in st.session_state:
+    st.session_state.step = 1
 # Initialize session state
 if 'level' not in st.session_state:
     st.session_state.level = 1
@@ -162,37 +167,20 @@ if 'level' not in st.session_state:
     st.session_state.responses = {}
     st.session_state.forward_query = ""
 
-def back():
+def go_back():
     if st.session_state.level > 1:
         st.session_state.level -= 1
         st.session_state.path.pop()
+        st.session_state.step = 1
 
-def get_yes_no_responses(questions):
-    responses = {}
-    for question in questions:
-        responses[question] = st.checkbox(question, key=question)
-    return responses
-
-def build_query():
-    query = []
-    for path in st.session_state.path:
-        query.append(path)
-        if path in st.session_state.responses:
-            for question, answer in st.session_state.responses[path].items():
-                query.append(f"{question}: {'Oo' if answer else 'Hindi'}")
-    return " > ".join(query)
-
-def summarize_responses():
-    summary = []
-    for path in st.session_state.path:
-        if path in st.session_state.responses:
-            for question, answer in st.session_state.responses[path].items():
-                if answer:
-                    summary.append(question)
-    #             summary.append(f"{question}: {'Oo' if answer else 'Hindi'}")
-    # return " ".join(summary)
-    result = "\n".join(summary)
-    return result
+def back_to_beginning():
+    st.session_state.level = 1
+    st.session_state.path = []
+    st.session_state.responses = {}
+    st.session_state.forward_query = ""
+    st.session_state.messages = []
+    st.session_state.step = 1
+    st.rerun()
 
 # Custom CSS to make all buttons the same width and stack horizontally
 st.markdown("""
@@ -209,29 +197,10 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Inject custom CSS for the "Ask AI Assistant" button
-st.markdown("""
-    <style>
-    div.stButton > button {
-        width: 100%;
-        height: auto;
-        margin: 5px 0;
-        white-space: normal;
-    }
-    div.stButton > button:hover {
-        background-color: #ddd;
-    }
-    div.stButton > button:has(span:contains('Ask AI Assistant')) {
-        background-color: #d4edda !important;
-        color: #155724 !important;
-        font-weight: bold !important;
-        border: 2px solid #155724 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
+print("DEVELOPER NOTE: Sprinkle 1")
 # Display buttons based on the current level
 if st.session_state.level == 1:
+    st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
     # st.header("Pumili ng pangunahing paksa:")
     for button in level1_buttons:
         if st.button(button):
@@ -241,64 +210,67 @@ if st.session_state.level == 1:
                 st.session_state.path.append(button)
                 st.session_state.level = 2
             st.rerun()
+
+    print("DEVELOPER NOTE: Sprinkle 2")
+
 elif st.session_state.level == 2:
+    print("DEVELOPER NOTE: Sprinkle 2.5")
+    st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
     main_topic = st.session_state.path[0]
-    if main_topic in level2_buttons:
-        # st.header(f"Pumili ng sub-topic sa ilalim ng {main_topic}:")
-        for button in level2_buttons[main_topic]:
-            if st.button(button):
-                if button == "Wala dito ang tanong ko.":
-                    st.session_state.level = 5
-                elif button == "Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?":
-                    st.session_state.level = 6
-                elif button == "Ano ang mga medical tests?":
-                    st.session_state.level = 7
-                else:
-                    st.session_state.path.append(button)
-                    st.session_state.level = 3
-                st.rerun()
-        if st.button("Back"):
-            back()
+    for button in level2_buttons[main_topic]:
+        if st.button(button):
+            if button == "Wala dito ang tanong ko.":
+                st.session_state.level = 5
+            elif button == "Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?":
+                st.session_state.level = 6
+            elif button == "Ano ang mga medical tests?":
+                st.session_state.level = 7
+            else:
+                st.session_state.path.append(button)
+                st.session_state.level = 3
             st.rerun()
-elif st.session_state.level == 3:
-    sub_topic = st.session_state.path[1]
-    if sub_topic in level3_buttons:
-        st.header(f"Pumili ng mga tanong:")
-        st.session_state.responses[sub_topic] = get_yes_no_responses(level3_buttons[sub_topic])
+    print("DEVELOPER NOTE: Sprinkle 3")
+    if st.button("Back"):
+        go_back()
 
-        if st.button("Ask AI Assistant"):
-            st.session_state.forward_query = summarize_responses()
-            st.session_state.level = 4
-            st.rerun()
-            # st.write("Generated Query: ", st.session_state.forward_query)
-        if st.button("Back"):
-            back()
-            st.rerun()
+    print("The session state is:", st.session_state.level)
+    print("DEVELOPER NOTE: Sprinkle 3.5")
 
-elif st.session_state.level == 4:
+    print("The session state level is:", st.session_state.level)
+    print("The session state step is:", st.session_state.step)
+
+elif st.session_state.level == 3 and st.session_state.step in [1, 8, 9, 10, 11, 12, 13]:
+    print("DEVELOPER NOTE: Inside ensemble session state step")
+    st.write("Ang CMA AI Assistant ay nagbibigay ng impormasyon, suporta, at mga mapagkukunan para sa mga Overseas Filipino Workers at kanilang mga pamilya. Gayunpaman, limitado ang aking mga serbisyo sa di-agarang gabay at pangkalahatang impormasyon legal. Hindi ako nagbibigay ng direktang legal na representasyon o interbensyon sa mga emerhensya.")
     main_topic = st.session_state.path[0]
     sub_topic = st.session_state.path[1]
-    custom_chatbot(main_topic, sub_topic, summarize_responses())
-    if st.button("Balik sa Simula"):
-        st.session_state.level = 1
-        st.session_state.path = []
-        st.session_state.responses = {}
-        st.session_state.forward_query = ""
-        st.session_state.messages = []
+    custom_chatbot_intro(sub_topic, level3_buttons)
+
+    back, balik_sa_simula = st.columns(2)
+    if back.button("⬅️ Back", key="back"):
+        go_back()
         st.rerun()
+    if balik_sa_simula.button("↪️ Balik sa Simula", key="balik_sa_simula"):
+        back_to_beginning()
+        st.rerun()
+
+    print("The session state level is:", st.session_state.level)
+    print("The session state step is:", st.session_state.step)
     
 elif st.session_state.level == 5:
+    st.write("Ang CMA AI Assistant ay nagbibigay ng impormasyon, suporta, at mga mapagkukunan para sa mga Overseas Filipino Workers at kanilang mga pamilya. Gayunpaman, limitado ang aking mga serbisyo sa di-agarang gabay at pangkalahatang impormasyon legal. Hindi ako nagbibigay ng direktang legal na representasyon o interbensyon sa mga emerhensya.")
     main_topic = st.session_state.path[0]
-    wala_custom_chatbot(main_topic)
+    wala_custom_chatbot_intro(main_topic)
+
+    if st.button("Back"):
+        go_back()
+        st.rerun()
+        
     if st.button("Balik sa Simula"):
-        st.session_state.level = 1
-        st.session_state.path = []
-        st.session_state.responses = {}
-        st.session_state.forward_query = ""
-        st.session_state.messages = []
+        back_to_beginning()
         st.rerun()
     
-    
+# Contract Upload Feature to be tested by CMA Only 
 elif st.session_state.level == 6: 
     # Title of the app
     st.title("Contract Upload")
@@ -317,25 +289,14 @@ elif st.session_state.level == 6:
         st.write("")
         st.write("Malaki!")
 
-    if st.button("Balik sa Simula"):
-        st.session_state.level = 1
-        st.session_state.path = []
-        st.session_state.responses = {}
-        st.session_state.forward_query = ""
-        st.session_state.messages = []
-        st.rerun() 
-
-elif st.session_state.level == 7:
-    st.header("<< CMA is not a medical provider and cannot give medical advice... >>")
-    st.write("Medical Test FAQ Here")
-    st.write("(Team to update)")
-    if st.button("Balik sa Simula"):
-        st.session_state.level = 1
-        st.session_state.path = []
-        st.session_state.responses = {}
-        st.session_state.forward_query = ""
-        st.session_state.messages = []
+    if st.button("Back"):
+        go_back()
         st.rerun()
+        
+    if st.button("Balik sa Simula"):
+        back_to_beginning()
+        st.rerun()
+
 
 ### Sidebar
 
