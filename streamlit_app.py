@@ -73,9 +73,9 @@ st.markdown(f"""
 # Define the buttons for each level
 level1_buttons = ['Pre-Deployment', 'Sahod o Wages', 'Repatriation']
 level2_buttons = {
-    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbabalik at Karagdagang Impormasyon', 'Oriyantrasyon at Sertipikasyon', 'Wala dito ang tanong ko.'],
+    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbabalik at Karagdagang Impormasyon', 'Oryentasyon at Sertipikasyon', 'Wala dito ang tanong ko.'],
     'Sahod o Wages': ['Pangkalahatang Impormasyon', 'Pag-aabuso at Pag-uulat', 'Kompensasyon at Mga Benepisyo', 'Embassy at Tulong', 'Wala dito ang tanong ko.'],
-    'Repatriation': ['Pagpapauwi at Mga Reklamo', 'Mga Proseso ng SENA', 'Money Claims', 'Saklaw ng Seguro', 'Embassy at Tulong', 'Serbisyo at Membership ng OWWA', 'Wala dito ang tanong ko.']
+    'Repatriation': ['Pagpapauwi at Mga Reklamo', 'Mga Proseso ng SENA', 'Mga Claim sa Pera', 'Saklaw ng Seguro', 'Serbisyo at Membership ng OWWA', 'Wala dito ang tanong ko.']
 }
 
 level3_buttons = {
@@ -101,7 +101,7 @@ level3_buttons = {
         "Pwede ba bumalik kapag natapos ang kontrata?",
         "Saan ako maaaring pumunta para sa karagdagang impormasyon?"
     ],
-    'Oriyantrasyon at Sertipikasyon': [
+    'Oryentasyon at Sertipikasyon': [
         "Ano ang PDOS?",
         "Kailangan mo ba ng gabay para makakuha ng Overseas Employment Certificate (OEC)?"
     ],
@@ -116,7 +116,8 @@ level3_buttons = {
         "Inaabuso po ako ng amo ko, saan po pwedeng humingi ng tulong?",
         "Saan pwede magreport kung hindi binibigay ng amo ko ang sahod ko?",
         "Sarado na po ang agency ko sa pinas, sino po ang maaaring ireklamo?",
-        "Undocumented po ako paano po ako makakahingi ng tulong?"
+        "Undocumented po ako paano po ako makakahingi ng tulong?",
+        "Hindi ko natapos ang kontrata ko sa aking employer dahil sa pang aabuso. ano ang gagawin?"
     ],
     'Kompensasyon at Mga Benepisyo': [
         "Sabi ng amo ko at agency dito, na dapat ko daw bayaran ang plane ticket ko, tama po ba ito?",
@@ -136,10 +137,9 @@ level3_buttons = {
         "Ano ang mga kailangan dalhin sa SENA?",
         "Pwede ba magsama ng lawyer sa SENA?"
     ],
-    'Money Claims': [
+    'Mga Claim sa Pera': [
         "Ano ang money claims?",
         "Saan ako pwede magfile ng money claims?",
-        "Hindi ko natapos ang kontrata ko sa aking employer dahil sa pang aabuso. ano ang gagawin?",
         "Ano ang proseso sa pagfile ng money claims sa NLRC?",
         "Ano ang prescriptive period ng money claims?",
         "Ano ang joint and solidary liability?"
@@ -258,13 +258,11 @@ elif st.session_state.level == 3 and st.session_state.step in [1, 8, 9, 10, 11, 
     print("The session state step is:", st.session_state.step)
     
 elif st.session_state.level == 5:
+    print("The session state level is:", st.session_state.level)
+    print("The session state step is:", st.session_state.step)
     st.write("Ang CMA AI Assistant ay nagbibigay ng impormasyon, suporta, at mga mapagkukunan para sa mga Overseas Filipino Workers at kanilang mga pamilya. Gayunpaman, limitado ang aking mga serbisyo sa di-agarang gabay at pangkalahatang impormasyon legal. Hindi ako nagbibigay ng direktang legal na representasyon o interbensyon sa mga emerhensya.")
     main_topic = st.session_state.path[0]
     wala_custom_chatbot_intro(main_topic)
-
-    if st.button("Back"):
-        go_back()
-        st.rerun()
         
     if st.button("Balik sa Simula"):
         back_to_beginning()

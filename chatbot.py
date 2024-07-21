@@ -88,7 +88,7 @@ def custom_chatbot_intro(level2_button, level3_buttons):
         user_question = st.text_input("Ang tanong ko ay...", key="user_question")
 
         if user_question:
-            print("DEVELOPER NOTE: Successful session state step 12")
+            print("DEVELOPER NOTE: Successful session state step 11")
             print("the session state step is:", st.session_state.step)
             main_topic = st.session_state.path[0]
             sub_topic = st.session_state.path[1]
@@ -101,16 +101,17 @@ def custom_chatbot_intro(level2_button, level3_buttons):
             response = retrieve_response(user_question)
             no_hindi_ko_alam = replace_unknown_response(response)
             message_td2.write(no_hindi_ko_alam)
-            message_td2.write(f"Kapaki-pakinabang ba ang sagot na ito?")  # Replace with actual answer logic
-
-            message_td3 = st.chat_message("assistant")
+            message_td2.write(f"Kapaki-pakinabang ba ang sagot na ito?")  
 
             thumbs_up, thumbs_down = st.columns(2)
             if thumbs_up.button("👍", key="thumbs_up2"):
-                message_td3.write("Salamat sa iyong feedback.")
+                st.session_state.step = 13
             elif thumbs_down.button("👎", key="thumbs_down2"):
-                message_td3.write("Salamat sa iyong feedback.")
+                st.session_state.step = 13
 
+    if st.session_state.step == 13:
+        message_td3 = st.chat_message("assistant")
+        message_td3.write("Salamat sa iyong feedback.")
 
     if st.session_state.step == 12:
         message_tu5 = st.chat_message("assistant")
@@ -122,7 +123,7 @@ def wala_custom_chatbot_intro(level1_button):
     user_question = st.text_input("Ang tanong ko ay...", key="user_question")
 
     if user_question:
-        print("DEVELOPER NOTE: Successful session state step 12")
+        print("the session state level is:", st.session_state.level)
         print("the session state step is:", st.session_state.step)
         message_td2 = st.chat_message("assistant")
         response = retrieve_response(user_question)

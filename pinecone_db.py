@@ -251,12 +251,14 @@ def chat_with_self_query_retriever(user_question, chat_history=None):
     return response, chat_history
 
 def retrieve_response(query):
+  print("Retrieval Started...")
   qa = RetrievalQA.from_chain_type(
     llm=openai_llm,  
     chain_type="stuff",  
     retriever=retriever,
     # chain_type_kwargs={"prompt": prompt}
     )  
+  print("Retrieval Complete.")
   return qa.run(query)
   
 def retrieve_response_with_sources(question):
