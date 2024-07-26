@@ -343,5 +343,5 @@ with st.sidebar:
 
 
     url = "https://www.facebook.com/centerformigrantadvocacyph/"
-    html_content = f'<p style="text-align:center; font-size:12px;">For all other inquiries, please contact us on <a href="{url}" target="_blank">Facebook</a></p>'
+    html_content = f'<p style="text-align:center; font-size:12px;">For all other inquiries, please contact us M-F between 9-5pm (Manila) on <a href="{url}" target="_blank">Facebook</a></p>'
     st.markdown(html_content, unsafe_allow_html=True)
