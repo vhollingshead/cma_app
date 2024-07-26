@@ -1,10 +1,12 @@
 import pandas as pd
+import streamlit as st
 basic_qa_csv_file_path = "repository/translated_responses.csv"
 
 def get_value_from_csv(level1, level2, level3, csv_file=basic_qa_csv_file_path):
+
     # Load the CSV file into a DataFrame
-    df = pd.read_csv(csv_file)
-    
+    df = pd.read_csv(csv_file, on_bad_lines='skip')
+
     # Filter the DataFrame based on the provided levels
     filtered_df = df[(df['Main_Topic'] == level1) & (df['Sub_Topic'] == level2) & (df['Sub_Topic_Question'] == level3)]
     

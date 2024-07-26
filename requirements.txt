@@ -8,3 +8,5 @@ langchain-pinecone
 streamlit_chat
 pydf
 lark
+wikipedia
+httpx

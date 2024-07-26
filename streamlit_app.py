@@ -2,9 +2,10 @@ import streamlit as st
 import base64
 from PIL import Image
 import requests
-from chatbot import custom_chatbot_intro, wala_custom_chatbot_intro
+from csv_db import get_value_from_csv
+from chatbot import chat_ensemble
 
-print("DEVELOPER NOTE: Sprinkle 00")
+print("DEVELOPER NOTE: Page is running...")
 
 # Access the OpenAI API key
 api_key = st.secrets["api_key"]
@@ -70,12 +71,21 @@ st.markdown(f"""
 
 # # <h1 style="margin-bottom: 5px;">Center for Migrant Advocacy<br>AI Assistant 🤖</h1>
 
+# Function to display each Q&A
+def display_q_and_a(question, answer):
+    with st.expander(question):
+        st.write(answer)
+        if st.button("Makipag-usap sa ___ 🤖", key=f"btn_{question}"):
+            st.session_state.level = 4
+            st.rerun()
+    
+
 # Define the buttons for each level
 level1_buttons = ['Pre-Deployment', 'Sahod o Wages', 'Repatriation']
 level2_buttons = {
-    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbabalik at Karagdagang Impormasyon', 'Oryentasyon at Sertipikasyon', 'Wala dito ang tanong ko.'],
-    'Sahod o Wages': ['Pangkalahatang Impormasyon', 'Pag-aabuso at Pag-uulat', 'Kompensasyon at Mga Benepisyo', 'Embassy at Tulong', 'Wala dito ang tanong ko.'],
-    'Repatriation': ['Pagpapauwi at Mga Reklamo', 'Mga Proseso ng SENA', 'Mga Claim sa Pera', 'Saklaw ng Seguro', 'Serbisyo at Membership ng OWWA', 'Wala dito ang tanong ko.']
+    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbabalik at Karagdagang Impormasyon', 'Oryentasyon at Sertipikasyon'],
+    'Sahod o Wages': ['Pangkalahatang Impormasyon', 'Pag-aabuso at Pag-uulat', 'Kompensasyon at Mga Benepisyo', 'Migrant Workers Office (dating POLO)'],
+    'Repatriation': ['Pagpapauwi at Pagfile ng mga Reklamo', 'Mga Proseso ng SENA', 'Money Claims o Mga hindi nabayarang sahod at mga danyos', 'Compulsory Insurance Coverage for Agency-Hired Migrant Workers', 'OWWA Programs and Services']
 }
 
 level3_buttons = {
@@ -124,37 +134,35 @@ level3_buttons = {
         "Sino ang magbabayad para sa aking airfare kung ako ay terminate?",
         "Hindi ako binibigyan ng pagkain ng amo ko, ang food allowance ba ay included sa kontrata?"
     ],
-    'Embassy at Tulong': [
+    'Migrant Workers Office (dating POLO)': [
         "Saan ang embassy at MWO/POLO?",
         "May immediate access ka ba sa pinakamalapit na embahada o konsulado ng Pilipinas?",
         "Kailangan mo ba ng contact information para sa mga opisina ng MWO?"
     ],
-    'Pagpapauwi at Mga Reklamo': [
+    'Pagpapauwi at Pagfile ng mga Reklamo': [
         "Nakauwi na po ako pinas, paano mag-file ng reklamo sa akin recruitment agency?"
     ],
     'Mga Proseso ng SENA': [
         "Ano ang SENA?",
-        "Ano ang mga kailangan dalhin sa SENA?",
+        "Paano magfile ng complaint para sa SENA?",
         "Pwede ba magsama ng lawyer sa SENA?"
     ],
-    'Mga Claim sa Pera': [
+    'Money Claims o Mga hindi nabayarang sahod at mga danyos': [
         "Ano ang money claims?",
         "Saan ako pwede magfile ng money claims?",
         "Ano ang proseso sa pagfile ng money claims sa NLRC?",
         "Ano ang prescriptive period ng money claims?",
         "Ano ang joint and solidary liability?"
     ],
-    'Saklaw ng Seguro': [
+    'Compulsory Insurance Coverage for Agency-Hired Migrant Workers': [
         "Ano ang Compulsory Insurance Coverage for Agency-Hired Migrant Workers?",
-        "Sino ang sakop ng Agency-Hired OFW Compulsory Insurance?",
         "Ano-ano ang mga benefits at coverages ng Agency-Hired OFW Compulsory Insurance?"
     ],
-    'Serbisyo at Membership ng OWWA': [
-        "Gusto mo bang malaman ang support services na ibinibigay ng OWWA?",
-        "Ikaw ba ay isang active OWWA member?"
+    'OWWA Programs and Services': [
+        "Gusto mo bang malaman ang support services na ibinibigay ng OWWA?"
     ]
 }
-print("DEVELOPER NOTE: Sprinkle 0")
+print("DEVELOPER NOTE: Initializing State")
 if 'level' in st.session_state:
     print("The session state level is:", st.session_state.level)
     print("The session state step is:", st.session_state.step)
@@ -166,6 +174,12 @@ if 'level' not in st.session_state:
     st.session_state.path = []
     st.session_state.responses = {}
     st.session_state.forward_query = ""
+
+def go_back():
+    if st.session_state.level > 1:
+        st.session_state.level -= 1
+        st.session_state.path.pop()
+        st.session_state.step = 1
 
 def go_back():
     if st.session_state.level > 1:
@@ -197,54 +211,57 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-print("DEVELOPER NOTE: Sprinkle 1")
+print("DEVELOPER NOTE: Main Page Successful")
 # Display buttons based on the current level
 if st.session_state.level == 1:
-    st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
-    # st.header("Pumili ng pangunahing paksa:")
+    st.write("**Magandandang Araw!**")
+    st.write("Para sa mga kababayan nating OFW na may gustong malaman tungkol sa pagtratrabaho sa Saudi Arabia,  maaari lamang pumili sa mga sumusunod:")
     for button in level1_buttons:
         if st.button(button):
-            if button == "Wala dito ang tanong ko.":
-                st.session_state.level = 5
-            else:
-                st.session_state.path.append(button)
-                st.session_state.level = 2
+            st.session_state.path.append(button)
+            st.session_state.level = 2
             st.rerun()
 
-    print("DEVELOPER NOTE: Sprinkle 2")
+    print("DEVELOPER NOTE: Sub-Page Successful")
 
 elif st.session_state.level == 2:
-    print("DEVELOPER NOTE: Sprinkle 2.5")
-    st.write("Para sa mga kababayan nating OFW na pupunta sa Saudi Arabia at gustong malaman ang tungkol sa pre-departure, deployment, at repatriation, nandito ang serbisyong ito para tulungan kayo!")
+    print("DEVELOPER NOTE: Entering Session State Level 2")
+    st.write("Para sa mga kababayan nating OFW na may gustong malaman tungkol sa pagtratrabaho sa Saudi Arabia,  maaari lamang pumili sa mga sumusunod:")
     main_topic = st.session_state.path[0]
     for button in level2_buttons[main_topic]:
         if st.button(button):
-            if button == "Wala dito ang tanong ko.":
-                st.session_state.level = 5
-            elif button == "Kailangan mo ba ng tulong sa pagsasalin ng iyong kontrata sa Tagalog?":
-                st.session_state.level = 6
-            elif button == "Ano ang mga medical tests?":
-                st.session_state.level = 7
+            if button == "Wala dito ang nais kong itanong.":
+                st.session_state.level = 4
             else:
                 st.session_state.path.append(button)
                 st.session_state.level = 3
             st.rerun()
-    print("DEVELOPER NOTE: Sprinkle 3")
+    print("DEVELOPER NOTE: Exiting Session State Level 2")
     if st.button("Back"):
         go_back()
+        st.rerun()
 
-    print("The session state is:", st.session_state.level)
-    print("DEVELOPER NOTE: Sprinkle 3.5")
 
+elif st.session_state.level == 3 and st.session_state.step in [1, 8, 9, 10, 11, 12, 13, 20]:
+    print("DEVELOPER NOTE: Entering Session State 3")
     print("The session state level is:", st.session_state.level)
     print("The session state step is:", st.session_state.step)
-
-elif st.session_state.level == 3 and st.session_state.step in [1, 8, 9, 10, 11, 12, 13]:
-    print("DEVELOPER NOTE: Inside ensemble session state step")
-    st.write("Ang CMA AI Assistant ay nagbibigay ng impormasyon, suporta, at mga mapagkukunan para sa mga Overseas Filipino Workers at kanilang mga pamilya. Gayunpaman, limitado ang aking mga serbisyo sa di-agarang gabay at pangkalahatang impormasyon legal. Hindi ako nagbibigay ng direktang legal na representasyon o interbensyon sa mga emerhensya.")
+    st.write("**Ako ang CMA AI Assistant na nagbibigay ng mga impormasyon na makakatulong sa mga Overseas Filipino Workers at kanilang mga pamilya.**")
+    st.write("**DAPAT TANDAAN:** Sa usaping legal, ang bawat reklamo o kaso ay may pagkakaiba kaya mas mainam na komunsulta sa isang abogado. Ang impormasyon na maibibigay ko ay pangkalahatan lamang at para sa mga iba pa pang katanungan narito din ako para i-konek ka sa CMA caseworker.")
     main_topic = st.session_state.path[0]
     sub_topic = st.session_state.path[1]
-    custom_chatbot_intro(sub_topic, level3_buttons)
+    qa_list = level3_buttons[sub_topic]
+    print("The main_topic is:", main_topic)
+    print("The sub_topic is:", sub_topic)
+    print("The qa_list is:", qa_list)
+    for qa in qa_list:
+        csv_answer = get_value_from_csv(main_topic, sub_topic, qa)
+        display_q_and_a(qa, csv_answer)
+    
+    with st.expander("Wala dito ang nais kong itanong."):
+        if st.button("Makipag-usap sa ___ 🤖", key=f"btn_{sub_topic}"):
+            st.session_state.level = 4
+            st.rerun()
 
     back, balik_sa_simula = st.columns(2)
     if back.button("⬅️ Back", key="back"):
@@ -257,17 +274,24 @@ elif st.session_state.level == 3 and st.session_state.step in [1, 8, 9, 10, 11, 
     print("The session state level is:", st.session_state.level)
     print("The session state step is:", st.session_state.step)
     
-elif st.session_state.level == 5:
+elif st.session_state.level == 4:
     print("The session state level is:", st.session_state.level)
     print("The session state step is:", st.session_state.step)
-    st.write("Ang CMA AI Assistant ay nagbibigay ng impormasyon, suporta, at mga mapagkukunan para sa mga Overseas Filipino Workers at kanilang mga pamilya. Gayunpaman, limitado ang aking mga serbisyo sa di-agarang gabay at pangkalahatang impormasyon legal. Hindi ako nagbibigay ng direktang legal na representasyon o interbensyon sa mga emerhensya.")
+    st.write("**Ako ang CMA AI Assistant  na nagbibigay ng mga impormasyon na makakatulong sa mga Overseas Filipino Workers at kanilang mga pamilya.**")
+    st.write("**DAPAT TANDAAN:** Sa usaping legal, ang bawat reklamo o kaso ay may pagkakaiba kaya mas mainam na komunsulta sa isang abogado. Ang impormasyon na maibibigay ko ay pangkalahatan lamang at para sa mga iba pa pang katanungan narito din ako para i-konek ka sa CMA caseworker.")
+    
     main_topic = st.session_state.path[0]
-    wala_custom_chatbot_intro(main_topic)
-        
-    if st.button("Balik sa Simula"):
+    sub_topic = st.session_state.path[1]
+    chat_ensemble(main_topic, sub_topic)
+
+    back, balik_sa_simula = st.columns(2)
+    if back.button("⬅️ Back", key="back"):
         back_to_beginning()
         st.rerun()
-    
+    if balik_sa_simula.button("↪️ Balik sa Simula", key="balik_sa_simula"):
+        back_to_beginning()
+        st.rerun()
+
 # Contract Upload Feature to be tested by CMA Only 
 elif st.session_state.level == 6: 
     # Title of the app
@@ -299,17 +323,22 @@ elif st.session_state.level == 6:
 ### Sidebar
 
 with st.sidebar:
-    st.header("Hello! 👋 Ako si ang inyong friendly AI Assistant 🤖.")
-    st.caption("Tumutulong ako sa mga overseas Filipino worker sa mga tanong tungkol sa pre-deployment, legal na karapatan, at repatriation. Kung kailangan mo ng impormasyon o tulong, narito ako para magbigay ng tumpak na impormasyon at suporta. Sabik akong tulungan ka!")
+    st.header("Hello! 👋 Ako si ___ ang inyong friendly AI Assistant 🤖.")
+    st.caption("Tumutulong ako sa mga Overseas Filipino Workers sa pamamagitan nang pagbigay ng mga kasagutan sa mgatanong tungkol sa pre-deployment, onsite, at repatriation.")
+    st.caption("Narito ako upang gabayan ka!")
+
     # st.divider()
 
     with st.expander("Sino si CMA?"):
-        st.caption("Ang Center for Migrant Advocacy – Philippines ay isang advocacy group na nagtataguyod ng mga karapatan ng mga overseas Filipinos, land or sea-based migrant workers, Filipino immigrants at kanilang mga pamilya. Tumutulong ang center na mapabuti ang kalagayang pang-ekonomiya, panlipunan at pampulitika ng mga migranteng pamilyang Pilipino saanman sa pamamagitan ng pagtataguyod ng patakaran, pagpapakalat ng impormasyon, networking, pagbuo ng kakayahan at direktang tulong.")
+        st.caption("*Ang Center for Migrant Advocacy - Philippines* ay isang advocacy group na nagtataguyod ng mga karapatan ng mga overseas Filipinos, land or sea-based migrant workers, Filipino immigrants at kanilang mga pamilya. Tumutulong ang center na mapabuti ang kalagayang pang-ekonomiya, panlipunan at pampulitika ng mga OFWs at kanilang mga pamilya sa pamamagitan ng policy research and advocacy, capacity-building, networking/partnerships, at direct assistance/case assistance.")
 
     with st.expander("Bakit mahalaga ang AI Assistant na ito?"):
-        st.caption("Ang Center for Migrant Advocacy ay nag-aanyaya sa pakikipagtulungan at puna upang pinuhin at i-optimize ang solusyon na ito, na tinitiyak na epektibong natutugunan nito ang magkakaibang pangangailangan ng mga OFW. Ang session na ito ay naglalayon na mangalap ng mahalagang feedback mula sa dati at kasalukuyang mga OFW upang pinuhin ang disenyo at functionality ng AI assistant. Napakahalaga ng ganitong mga pananaw habang nagsisikap ang CMA na magkaroon ng makabuluhang epekto sa buhay ng mga OFW sa pamamagitan ng makabagong teknolohiya. Inaasahan namin ang iyong pakikilahok at mga kontribusyon habang tinutuklasan namin ang mga posibilidad ng pagbabagong inisyatiba na ito.")
+        st.caption("Ang AI assistance na ito ay idinisenyo para idulog ang mga isyu at mapalakas ang kakayahan ng mga manggagawa na ipaglaban ang kanilang mga karapatan. Sa pamamagitan ng mga sumusunod: ")
+        st.caption("*Legal Information and Guidance:* Nagbibigay ng madaling maintindihang impormasyon tungkol sa karapatang legal at proseso.")
+        st.caption("*24/7 Availability:*  Madali ma-access at mabilis na nakakapagbigay ng mahalagang impormasyon anumang oras.")
+        st.caption("*Pagkonekta sa Tamang Ahensya ng Gobyerno:* Nagbibigay gabay kung saang ahensya ng gobyerno dapat idulog ang problema ng isang OFW.")
 
     with st.expander("Privacy Disclaimer"):
-        st.caption("Ang AI Assistant na ito ay naglalayong magbigay ng makatotohanang impormasyon tungkol sa iyong sitwasyon at hindi pa kumukolekta ng iyong personal na impormasyon. Ginagamit namin ang impormasyong ito upang maunawaan ang iba't ibang sitwasyon ng mga OFW at kanilang mga pamilya at kung paano sumangguni sa gobyerno o iba pang NGO tungkol sa iyong sitwasyon o problema. Maaari kang makipag-usap sa isang case manager pagkatapos gamitin ang AI Assistant na ito.")
+        st.caption("Ang AI Assistant na ito ay naglalayong magbigay ng mahalagang impormasyon tungkol sa iyong mga issues o problema sa pagtratrabaho sa ibang bansa at hindi para kumukolekta ng iyong personal na impormasyon. Ginagamit namin ang impormasyong ito upang maunawaan ang iba't ibang sitwasyon ng mga OFW at kanilang mga pamilya at kung paano sumangguni sa gobyerno o iba pang NGO tungkol sa iyong sitwasyon o problema. Maaari ka ring makipag-usap sa aming case manager pagkatapos gamitin ang AI Assistant na ito.")
 
-    st.caption('<p style="text-align:center">For other inquiries, please email us at: cma@cmaphils.net </p>', unsafe_allow_html=True)
+    st.caption('<p style="text-align:center">For other inquiries, please contact us on Facebook: https://www.facebook.com/centerformigrantadvocacyph/ </p>', unsafe_allow_html=True)
