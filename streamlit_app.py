@@ -341,4 +341,7 @@ with st.sidebar:
     with st.expander("Privacy Disclaimer"):
         st.caption("Ang AI Assistant na ito ay naglalayong magbigay ng mahalagang impormasyon tungkol sa iyong mga issues o problema sa pagtratrabaho sa ibang bansa at hindi para kumukolekta ng iyong personal na impormasyon. Ginagamit namin ang impormasyong ito upang maunawaan ang iba't ibang sitwasyon ng mga OFW at kanilang mga pamilya at kung paano sumangguni sa gobyerno o iba pang NGO tungkol sa iyong sitwasyon o problema. Maaari ka ring makipag-usap sa aming case manager pagkatapos gamitin ang AI Assistant na ito.")
 
-    st.caption('<p style="text-align:center">For other inquiries, please contact us on Facebook: https://www.facebook.com/centerformigrantadvocacyph/ </p>', unsafe_allow_html=True)
+
+    url = "https://www.facebook.com/centerformigrantadvocacyph/"
+    html_content = f'<p style="text-align:center; font-size:12px;">For all other inquiries, please contact us on <a href="{url}" target="_blank">Facebook</a></p>'
+    st.markdown(html_content, unsafe_allow_html=True)
