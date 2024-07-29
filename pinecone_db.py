@@ -7,35 +7,24 @@ from langchain_pinecone import PineconeVectorStore
 # from openai import OpenAI
 # from langchain.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOpenAI
-from langchain.chains import RetrievalQA 
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+# from langchain_openai import ChatOpenAI
+# from langchain.chains import RetrievalQA 
 # from langchain.chains import RetrievalQAWithSourcesChain  
 import streamlit as st
 
 import pandas as pd
-# import textwrap
 # from langchain_community.document_loaders import PyPDFLoader
 # from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from langchain_community.document_loaders.csv_loader import CSVLoader
+# from langchain.document_loaders import WebBaseLoader
 
 from langchain.retrievers.self_query.base import SelfQueryRetriever
-from langchain.chains.query_constructor.base import AttributeInfo
-from langchain.callbacks import StdOutCallbackHandler
+from langchain.chains import ConversationalRetrievalChain
 
 # from langchain.chains import ConversationChain
-from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.chains.conversation.memory import ConversationBufferMemory
-# # from langchain.prompts import (
-# #     SystemMessagePromptTemplate,
-# #     HumanMessagePromptTemplate,
-# #     ChatPromptTemplate,
-# #     MessagesPlaceholder
-# # )
-
-# from langchain.prompts import PromptTemplate
-# from langchain.chains import LLMChain, SimpleSequentialChain, SequentialChain
-# # from langchain.agents.agent_toolkits import create_python_agent
-# # from langchain.agents.agent_types import AgentType
-# from langchain_community.utilities import WikipediaAPIWrapper
+from langchain.prompts import PromptTemplate
+from langchain.schema import SystemMessage, HumanMessage
 
 print("DEVELOPER NOTE: Imports done")
 
@@ -53,10 +42,13 @@ embeddings_model = HuggingFaceEmbeddings(model_name=st_model_name)
 
 print("DEVELOPER NOTE: Embeddings Model Done")
 
+print("DEVELOPER NOTE: API Keys Done")
+
 # Pinecone Client
 pc = Pinecone(
         api_key=pinecone_api_key)
-index_name = "cma-app"
+
+index_name = "cme-app"
 index = pc.Index(index_name)
 print("Index Stats 1:")
 index.describe_index_stats()
@@ -69,236 +61,263 @@ print("DEVELOPER NOTE: Pinecone Initialized")
 # Chat model 
 # openai_llm = OpenAI(api_key= openai_api_key)
 openai_llm = ChatOpenAI(model="gpt-3.5-turbo")
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 print("DEVELOPER NOTE: Chat model initialized")
 
-# Documents
+# # Upsert Question-Answer .CSV to Pinecone DB
+# basic_qa_csv_file_path = "repository/translated_responses.csv"
+# df = pd.read_csv(basic_qa_csv_file_path)
 
-## CSV
-# basic_qa_csv_file_path = "/workspaces/cma_app/repository/Combined_App_Draft1_QA.csv"
-basic_qa_csv_file_path = "repository/translated_responses.csv"
+# print("DEVELOPER NOTE: pandas df read")
 
+# # Step 4: Process and insert data
+# vectors = []
+# for idx, row in df.iterrows():
+#     inquiry = row['Sub_Topic_Question']
+#     response = row['Established_Response_Tagalog']
+#     metadata = {
+#         'main_topic': row['Main_Topic'],
+#         'sub_topic': row['Sub_Topic'] # add more metadata as necessary
+#     }
+    
+#     # Embed the question and answer
+#     inquiry_embedding = embeddings_model.embed_documents([inquiry])[0]
+#     response_embedding = embeddings_model.embed_documents([response])[0]
 
-## PDF
-# policy_data = [
-#     ("Kingdom of Saudi Arabia",
-#      "Saudi Labor Law",
-#      "https://www.hrsd.gov.sa/sites/default/files/2017-05/LABOR%20LAW.pdf"
-#      ),
-#     ("Department of Migrant Workers",
-#      "Direct Hiring FAQs",
-#      "https://dmw.gov.ph/resources/dsms/DMW/Externals/2022/FAQ-POPS-DIRECT.pdf",
-#     ),
-#     ("Department of Migrant Workers",
-#         "Compulsory Insurance Coverage for Agency-Hired Migrant Workers",
-#         "https://dmw.gov.ph/resources/dsms/DMW/Externals/2022/FAQ-POPS-DIRECT.pdf",
-#         ),
-# ]
+#     # Use a unique ID for each entry
+#     entry_id = f"vec{idx}"
 
-# columns = ["source", "title", "url"]
+#     # Append to vectors list
+#     vectors.append({
+#         'id': entry_id,
+#         'values': inquiry_embedding,
+#         'metadata': {
+#             'inquiry': inquiry,
+#             'response': response,
+#             **metadata
+#         }
+#     })
 
-# policy_df = pd.DataFrame(policy_data, columns=columns)
+# print("DEVELOPER NOTE: Vectors Appended")
+# # Insert into Pinecone
+# index.upsert(
+#     vectors=vectors,
+#     namespace="cma-app_csv"
+# )
 
-# Document Chunking
+# print("DEVELOPER NOTE: CSV Uploaded")
 
-def get_chunks(type, file_or_policy_path, chunk_size=2000, chunk_overlap=500):
-  if type == "csv":
-    df  = pd.read_csv(file_or_policy_path)
-    first_row = df.iloc[0]
-    first_item = first_row.iloc[1]
-    second_item = first_row.iloc[2]
-    column_names_qa = list(df.columns)
-    print('This is the first item:', first_item)
-    print('This is the second item:', second_item)
-    print(column_names_qa)
+# ## Upsert Informational PDFs to Pinecone DB
+# chunk_size=1000
+# chunk_overlap=300
+# csv_file = 'repository/PDF_Links.csv'
+# df = pd.read_csv(csv_file)
 
-    loader_qa = CSVLoader(file_path=file_or_policy_path)
-    documents = loader_qa.load()
-    for document in documents:
-      metadata = document.metadata
-      metadata["Main_Topic"] = first_item
-      metadata["Sub_Topic"] = second_item
+# # Step 4: Process and insert data
+# vectors = []
+# for idx, row in df.iterrows():
+#     pdf_link = row['PDF_Link']
+#     print('this is the pdf link:',pdf_link)
+#     metadata = {
+#         'main_topic': row['Main_Topic'],
+#         'sub_topic': row['Sub_Topic'],
+#         'sub_topic_question': row['Sub_Topic_Question'],
+#         'pdf_link': pdf_link
+#     }
+    
+#     # Load and extract text from the PDF using PyPDFLoader
+#     loader = PyPDFLoader(pdf_link)
+#     documents = loader.load()
+    
+#     # Split the documents into chunks
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+#     chunks = text_splitter.split_documents(documents)
+    
+#     for chunk_idx, chunk in enumerate(chunks):
+#         chunk_text = chunk.page_content
+        
+#         # Embed the chunk content
+#         chunk_embedding = embeddings_model.embed_documents([chunk_text])[0]
 
-  else:
-    for row in file_or_policy_path.itertuples(index=False):
-      try:
-        loader_qa = PyPDFLoader(row.url)
-        documents = loader_qa.load()
+#         # Use a unique ID for each chunk
+#         entry_id = f"pdf-{idx}-chunk-{chunk_idx}"
 
-        for document in documents:
-          metadata = document.metadata
-          metadata["url"] = row.url
-          metadata["source"] = row.source
-          metadata["title"] = row.title
+#         # Append to vectors list
+#         vectors.append({
+#             'id': entry_id,
+#             'values': chunk_embedding,
+#             'metadata': {**metadata, 'chunk_index': chunk_idx}
+#         })
 
-        if metadata.get("page", None) is not None:
-            metadata["page"] += 1
+# # Insert into Pinecone
+# index.upsert(
+#     vectors=vectors,
+#     namespace="cma-app_pdf"
+# )
 
-      except Exception as e:  # Consider catching specific exceptions
-          print(f"Failed to process {row.url} due to: {e}")
+# print("DEVELOPER NOTE: PDFs Uploaded")
 
-  text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap
-    )
+## Upsert Websites to Pinecone DB
+# csv_file = 'repository/Web_Links.csv'
+# df = pd.read_csv(csv_file)
+# print("DEVELOPER NOTE: Website CSV Loaded")
 
-  return text_splitter.split_documents(documents)
+# chunk_size = 300
+# chunk_overlap = 75
+# vectors = []
 
-def explore_documents(documents):
-  block_indent = "   "
-  metadata = documents[0].metadata
-  content = documents[0].page_content[:300] + ". . ."
-  print(f"{metadata['Main_Topic']} {len(documents)} chunks")
-  print("Truncated First chunk:")
-  print(
-      textwrap.fill(
-          content,
-          initial_indent=block_indent,
-          subsequent_indent=block_indent,
-          replace_whitespace=True,
-      )
-  )
-  print()
+# for idx, row in df.iterrows():
+#     web_link = row['Web_Link']
+#     print("The web link is:", web_link)
 
-def pretty_print_result(result):
-  indent = "    "
-  source = [document.metadata["source"] for document in result['source_documents']]
-  print()
-  print(f"Query: {result['query']}")
-  # print(f"Sources: {source}")
-  print(f"Answer:")
-  indent = "    "
-  print (textwrap.fill(result['result'], initial_indent=indent, subsequent_indent=indent))
-chunks = []
+#     metadata = {
+#         'main_topic': row['Main_Topic'],
+#         'sub_topic': row['Sub_Topic'],
+#         'sub_topic_question': row['Sub_Topic_Question'],
+#         'web_link': web_link
+#     }
+    
+#     # Load web content using WebBaseLoader
+#     loader = WebBaseLoader(web_link)
+#     documents = loader.load()
+#     print("DEVELOPER NOTE: WebBaseLoader Successful")
 
-# basic_qa_chunks = get_chunks('csv', basic_qa_csv_file_path)
-# explore_documents(basic_qa_chunks)
-# chunks += basic_qa_chunks
+#     # Split the content into chunks
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+#     chunks = text_splitter.split_documents(documents)
+#     print("DEVELOPER NOTE: Chunk Split is Successful")
+#     print('this is chunks:', chunks)
 
-# pdf_basic_qa_chunks = get_chunks('pdf', policy_df)
-# chunks += pdf_basic_qa_chunks
+#     for chunk_idx, chunk in enumerate(chunks):
+#       print("DEVELOPER NOTE: Entering Chunk Embedding")
+#       chunk_text = chunk['page_content']
+      
+#       # Embed the chunk content
+#       chunk_embedding = embeddings_model.embed_documents([chunk_text])[0]
 
-# vectorstore_from_docs = PineconeVectorStore.from_documents(
-#         chunks,
-#         index_name=index_name,
-#         embedding=embeddings_model,
-#         namespace="cma-app_docs"
-#     ) 
-
-# # check database size
-# print("Index Stats 2:")
-index.describe_index_stats()
-
-print("DEVELOPER NOTE: Chunking Done")
-
-handler = StdOutCallbackHandler()
-
-metadata_field_info = [
-    # AttributeInfo(
-    #     name="source",
-    #     description="The organization or source that created the document.",
-    #     type="string or list[string]",
-    # ),
-    # AttributeInfo(
-    #     name="title",
-    #     description="The title of the document",
-    #     type="string",
-    # ),
-    # AttributeInfo(
-    #     name="url",
-    #     description="The url for the document",
-    #     type="string",
-    # ),
-    AttributeInfo(
-        name="Main_Topic",
-        description="Main topic",
-        type="string",
-    ),
-    AttributeInfo(
-        name="Sub_Topic",
-        description="Sub-topic under main",
-        type="string",
-    ),
-]
-document_content_description = "A policy"
-
-print("DEVELOPER NOTE: Meta Data Done")
-
-retriever = SelfQueryRetriever.from_llm(
-   openai_llm,
-   vectorstore,
-   document_content_description,
-   metadata_field_info,
-   verbose=True,
-   enable_limit=True
-   )
-
-print("DEVELOPER NOTE: SelQueryRetriever Initialized")
-
-# # Templates
-
-# @st.cache_resource
-# def wiki(prompt):
-#     wiki_research = WikipediaAPIWrapper().run(prompt)
-#     return wiki_research
+#       # Use a unique ID for each chunk
+#       entry_id = f"website-{idx}-chunk-{chunk_idx}"
+#       print("DEVELOPER NOTE: Entry ID is:", entry_id)
+#       print("DEVELOPER NOTE: Values is:", chunk_embedding)
+#       print("DEVELOPER NOTE: Chunk Idx is:", chunk_idx)
 
 
-# wiki_search_template = PromptTemplate(
-#     input_variables=['level1', 'level2', 'query'],
-#     template='Translate {level1}, {level2}, and {query} into English. Use their English translations going forward. The user is an Overseas Filipino Worker or family member asking about {level2} as it relates to {level1}. Summarize their question "{query}" and formulate the best term to search in Wikipedia to help answer or substantiate this query.')
+#       # Append to vectors list
+#       vectors.append({
+#           'id': entry_id,
+#           'values': chunk_embedding,
+#           'metadata': {**metadata, 'chunk_index': chunk_idx}
+#       })
 
-# summarization_template = PromptTemplate(
-#     input_variables=['level1', 'level2', 'query', 'wikipedia_research'],
-#     template='The user is an Overseas Filipino Worker or family member asking about {level1} and more specifically about {level2}. Summarize their question "{query}" and substantiate it with Wikipedia research from {wikipedia_research}.')
+# # Step 5: Insert into Pinecone
+# index.upsert(
+#     vectors=vectors,
+#     namespace="cma-app_website"
+# )
 
-# ### Bot receives the question ### 
+# print("DEVELOPER NOTE: Websites Uploaded")
 
-# follow_up_q_template = PromptTemplate(
-#     input_variables=['enriched_query'],
-#     template='List the questions you would need answered in order to properly answer this question {enriched_query}. Do not ask for any personal, identifying, or sensitive information. This should be in easy to understand Tagalog.')
+# handler = StdOutCallbackHandler()
 
-# user_follow_up_q_template = PromptTemplate(
-#     input_variables=['additional_info', 'enriched_query'],
-#     template='The user is an Overseas Filipino Worker or family member providing this additional information: {additional_info}. Combine this info with {enriched_query} to produce an answer in easy to understand Tagalog. Ensure your tone is warm and friendly.')
+# Translation
 
-
-# wiki_term_chain = LLMChain(llm=openai_llm, prompt=wiki_search_template, verbose=True, output_key='wiki_term')
-# summary_chain = LLMChain(llm=openai_llm, prompt=summarization_template, verbose=True, output_key='summary')
-# follow_up_q_chain = LLMChain(llm=openai_llm, prompt=follow_up_q_template, verbose=True, output_key='followup_q')
-# user_follow_up_q_chain = LLMChain(llm=openai_llm, prompt=user_follow_up_q_template, verbose=True, output_key='user_answer_followupq')
-
-csv_file_path = 'chat_history.csv'
-
-if not os.path.exists(csv_file_path):
-   with open(csv_file_path, 'w') as f:
-     f.write('Main_Topic, Sub_Topic, question,response\n')
-
-def append_to_csv(question, response, metadata):
-    metadata_values = ",".join(f'"{value}"' for value in metadata.values())
-    with open(csv_file_path, 'a') as f:
-        f.write(f'{metadata_values}, "{question}","{response}"\n')
-
-print("DEVELOPER NOTE: CSV append code")
-
-def retrieve_response(query):
-  print("Retrieval Started...")
-  qa = RetrievalQA.from_chain_type(
-    llm=openai_llm,  
-    chain_type="stuff",  
-    retriever=retriever
-    # chain_type_kwargs={"prompt": prompt}
-    )  
-  print("Retrieval Complete.")
-  return qa.run(query)
+def translate_to_tagalog(text):
+    # Create the messages list
+    messages = [
+        SystemMessage(content="You are a helpful assistant that translates text to Tagalog."),
+        HumanMessage(content=f"Translate the following text to Tagalog with a friendly tone: {text}")
+    ]
+    
+    # Generate the translation
+    response = openai_llm(messages)
+    return response.content
   
-def retrieve_response_with_sources(question):
-  qa_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
-    llm = openai_llm,
-    retriever = retriever,
-    return_source_documents = True,
-    callbacks = [handler],
-    # chain_type_kwargs={"prompt": prompt}
-    )
-  return qa_with_sources({"question": question})
 
-print("DEVELOPER NOTE: Retrieval Response Complete")
+# Prompt Template
+prompt_template_case_manager = """
+Isa kang case manager assistant na may access sa database ng dokumento. Isang Overseas Filipino Worker mula sa Saudi Arabia ang nagtanong ng sumusunod:
+---
+Tanong: {query}
+Pangunahing Paksa: {main_topic}
+Paksa: {sub_topic}
+---
+Batay sa impormasyong ito, bumuo ng isang query upang makuha ang mga pinaka-kaugnay na dokumento mula sa database at siguraduhing ang iyong tugon ay nasa Tagalog at may palakaibigang tono.
+"""
+
+# Create a PromptTemplate instance
+prompt = PromptTemplate(
+    template=prompt_template_case_manager,
+    input_variables=["query", "main_topic", "sub_topic"]
+)
+
+document_contents = "page_content"
+metadata_field_info = [
+    {"name": "main_topic", "type": "string"},
+    {"name": "sub_topic", "type": "string"}]
+
+def create_self_query_retriever(query, main_topic, sub_topic, llm = openai_llm, retriever = Pinecone(index), prompt_template = prompt_template_case_manager):
+    # Fill the prompt template with the query and metadata
+    filled_prompt = prompt_template.format(
+       query=query,
+       main_topic=main_topic,
+       sub_topic=sub_topic)
+    
+    print(filled_prompt)  # Print the filled prompt for debugging
+    # Create the SelfQueryRetriever using the filled prompt
+    self_query_retriever = SelfQueryRetriever.from_llm(
+        llm=llm,
+        retriever=retriever,
+        vectorstore=vectorstore,
+        document_contents=document_contents,
+        metadata_field_info=metadata_field_info)
+    return self_query_retriever
+
+def chatbot_(query, main_topic, sub_topic):
+  self_query_retriever = create_self_query_retriever(query=query, main_topic=main_topic, sub_topic=sub_topic, llm = openai_llm, retriever = Pinecone(index), prompt_template = prompt_template_case_manager)
+  print("DEVELOPER NOTE: SelQueryRetriever Initialized")
+
+  memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+  conversational_chain = ConversationalRetrievalChain.from_llm(openai_llm, retriever= self_query_retriever, memory= memory)
+  chat_history = memory.load_memory_variables({}).get("chat_history", [])
+  result = conversational_chain(
+        inputs={"question": query, "chat_history": chat_history}
+    )
+  response = result['answer']
+
+  return translate_to_tagalog(response)
+
+# csv_file_path = 'chat_history.csv'
+
+# if not os.path.exists(csv_file_path):
+#    with open(csv_file_path, 'w') as f:
+#      f.write('Main_Topic, Sub_Topic, question,response\n')
+
+# def append_to_csv(question, response, metadata):
+#     metadata_values = ",".join(f'"{value}"' for value in metadata.values())
+#     with open(csv_file_path, 'a') as f:
+#         f.write(f'{metadata_values}, "{question}","{response}"\n')
+
+# print("DEVELOPER NOTE: CSV append code")
+
+# def retrieve_response(query):
+#   print("Retrieval Started...")
+#   qa = RetrievalQA.from_chain_type(
+#     llm=openai_llm,  
+#     chain_type="stuff",  
+#     retriever=retriever
+#     # chain_type_kwargs={"prompt": prompt}
+#     )  
+#   print("Retrieval Complete.")
+#   return qa.run(query)
+  
+# def retrieve_response_with_sources(question):
+#   qa_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
+#     llm = openai_llm,
+#     retriever = retriever,
+#     return_source_documents = True,
+#     callbacks = [handler],
+#     # chain_type_kwargs={"prompt": prompt}
+#     )
+#   return qa_with_sources({"question": question})
+
+# print("DEVELOPER NOTE: Retrieval Response Complete")

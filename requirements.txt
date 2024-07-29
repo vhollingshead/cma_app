@@ -10,3 +10,4 @@ pydf
 lark
 wikipedia
 httpx
+langchain_openai

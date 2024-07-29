@@ -3,7 +3,7 @@ import base64
 from PIL import Image
 import requests
 from csv_db import get_value_from_csv
-from chatbot import chat_ensemble
+from chatbot_update import chat_ensemble
 
 print("DEVELOPER NOTE: Page is running...")
 
@@ -75,9 +75,9 @@ st.markdown(f"""
 def display_q_and_a(question, answer):
     with st.expander(question):
         st.write(answer)
-        if st.button("Makipag-usap sa ___ 🤖", key=f"btn_{question}"):
-            st.session_state.level = 4
-            st.rerun()
+        # if st.button("Makipag-usap sa ___ 🤖", key=f"btn_{question}"):
+        #     st.session_state.level = 4
+        #     st.rerun()
     
 
 # Define the buttons for each level
@@ -240,7 +240,6 @@ elif st.session_state.level == 2:
     if st.button("Back"):
         go_back()
         st.rerun()
-
 
 elif st.session_state.level == 3 and st.session_state.step in [1, 8, 9, 10, 11, 12, 13, 20]:
     print("DEVELOPER NOTE: Entering Session State 3")
