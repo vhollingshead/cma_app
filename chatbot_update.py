@@ -40,7 +40,7 @@ def chatbot_greeting(level1, level2=None):
 
 def user_response(main_topic, sub_topic):
     with st.chat_message("user"):
-        user_question = st.text_area("Mayroon akong tanong na ito...", key="user_question")
+        user_question = st.text_input("Mayroon akong tanong na ito...", key="user_question")
         if user_question:
             query = user_question
             # response = retrieve_response(user_question) # basic response
