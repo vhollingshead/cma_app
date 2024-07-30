@@ -224,7 +224,7 @@ print("DEVELOPER NOTE: Chat model initialized")
 def translate_to_tagalog(text):
     # Create the messages list
     messages = [
-        SystemMessage(content="You are a helpful assistant that translates text to Tagalog."),
+        SystemMessage(content="You are a helpful assistant that translates text to Tagalog. Omit 'Narito ang pagsasalin sa Tagalog ng text:'' from your response."),
         HumanMessage(content=f"Translate the following text to Tagalog with a friendly tone: {text}")
     ]
     
