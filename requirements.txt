@@ -10,4 +10,3 @@ pydf
 lark
 httpx
 langchain_openai
-csv
