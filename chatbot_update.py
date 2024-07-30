@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_chat import message
 from pinecone_db import chatbot_
 import re
-# from wikiwrapper import wiki_wrapper
+from csv_db import save_to_csv
 
 # Access the OpenAI API key
 openai_api_key = st.secrets["api_key"]
@@ -40,12 +40,13 @@ def chatbot_greeting(level1, level2=None):
 
 def user_response(main_topic, sub_topic):
     with st.chat_message("user"):
-        user_question = st.text_input("Mayroon akong tanong na ito...", key="user_question")
+        user_question = st.text_input("Ang katanungan ko ay...", key="user_question")
         if user_question:
             query = user_question
             # response = retrieve_response(user_question) # basic response
             response = chatbot_(query, main_topic, sub_topic)
             no_hindi_ko_alam = replace_unknown_response(response)
+            save_to_csv(query, no_hindi_ko_alam)
             st.session_state.modified_answer = no_hindi_ko_alam
             st.session_state.step = 9
 

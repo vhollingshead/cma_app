@@ -1,6 +1,10 @@
 import pandas as pd
 import streamlit as st
+import csv
+import os
+
 basic_qa_csv_file_path = "repository/translated_responses.csv"
+chat_history = 'chat_history.csv'
 
 def get_value_from_csv(level1, level2, level3, csv_file=basic_qa_csv_file_path):
 
@@ -40,3 +44,19 @@ def get_value_from_csv(level1, level2, level3, csv_file=basic_qa_csv_file_path):
         for question in filtered_df_check_check.iloc[:]['Sub_Topic_Question']:
             print(question)
         return "Ako ay humihingi ng paumanhin. Hindi ko masagot ang tanong na iyon mangyaring sumangguni sa Center for Migrant Advocacy Direct Assistance para sa tulong: https://www.facebook.com/centerformigrantadvocacyph/"
+
+def save_to_csv(string_to_write, string_response, csv_file_name='chat_history.csv'):
+    file_exists = os.path.isfile(csv_file_name)
+
+    # Open the CSV file in append mode
+    with open(csv_file_name, mode='a', newline='') as file:
+        writer = csv.writer(file)
+
+        # Write the header only if the file doesn't exist
+        if not file_exists:
+            writer.writerow(["Input String", "Response String"])
+
+        # Write the strings to the CSV file
+        writer.writerow([string_to_write, string_response])
+
+    print(f"Strings '{string_to_write}' and '{string_response}' have been written to {csv_file_name}.")

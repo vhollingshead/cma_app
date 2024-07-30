@@ -83,7 +83,7 @@ def display_q_and_a(question, answer):
 # Define the buttons for each level
 level1_buttons = ['Pre-Deployment', 'Sahod o Wages', 'Repatriation']
 level2_buttons = {
-    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbabalik at Karagdagang Impormasyon', 'Oryentasyon at Sertipikasyon'],
+    'Pre-Deployment': ['Paghahanap ng Trabaho at Ahensya', 'Mga Kontrata at Mga Kailangan', 'Sahod at Kompensasyon', 'Pagbalik muli sa ibang bansa at Mga Karagdagang Impormasyon', 'Oryentasyon at Sertipikasyon'],
     'Sahod o Wages': ['Pangkalahatang Impormasyon', 'Pag-aabuso at Pag-uulat', 'Kompensasyon at Mga Benepisyo', 'Migrant Workers Office (dating POLO)'],
     'Repatriation': ['Pagpapauwi at Pagfile ng mga Reklamo', 'Mga Proseso ng SENA', 'Money Claims o Mga hindi nabayarang sahod at mga danyos', 'Compulsory Insurance Coverage for Agency-Hired Migrant Workers', 'OWWA Programs and Services']
 }
@@ -107,8 +107,8 @@ level3_buttons = {
         "Magkano ang sahod ng domestic worker sa Saudi Arabia?",
         "Magkano ang sahod isang OFW sa Saudi Arabia?"
     ],
-    'Pagbabalik at Karagdagang Impormasyon': [
-        "Pwede ba bumalik kapag natapos ang kontrata?",
+    'Pagbalik muli sa ibang bansa at Mga Karagdagang Impormasyon': [
+        "Pwede ba magtrabaho ulit sa ibang bansa kapag natapos na ang kontrata?",
         "Saan ako maaaring pumunta para sa karagdagang impormasyon?"
     ],
     'Oryentasyon at Sertipikasyon': [
