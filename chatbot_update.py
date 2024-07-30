@@ -66,10 +66,10 @@ def chatbot_followup(mayroon_q_to_state_meron, mayroon_q_to_state_wala):
     yes, no = st.columns(2)
     if yes.button("✅ Meron po", key="yes"):
         st.session_state.step = mayroon_q_to_state_meron
-        st.experimental_rerun()
+        st.rerun()
     elif no.button("❌ Wala na po", key="no"):
         st.session_state.step = mayroon_q_to_state_wala
-        st.experimental_rerun()
+        st.rerun()
 
 def wala_q():
     message_tu5 = st.chat_message("assistant")
