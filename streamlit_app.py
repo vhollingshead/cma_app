@@ -214,7 +214,7 @@ st.markdown("""
 print("DEVELOPER NOTE: Main Page Successful")
 # Display buttons based on the current level
 if st.session_state.level == 1:
-    st.write("**Magandandang Araw!**")
+    st.write("**Magandang Araw!**")
     st.write("Para sa mga kababayan nating OFW na may gustong malaman tungkol sa pagtratrabaho sa Saudi Arabia,  maaari lamang pumili sa mga sumusunod:")
     for button in level1_buttons:
         if st.button(button):

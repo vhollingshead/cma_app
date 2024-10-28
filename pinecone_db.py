@@ -4,24 +4,14 @@ import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from pinecone import Pinecone # https://docs.pinecone.io/integrations/langchain#4-initialize-a-langchain-vector-store
 from langchain_pinecone import PineconeVectorStore
-# from openai import OpenAI
-# from langchain.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-# from langchain_openai import ChatOpenAI
-# from langchain.chains import RetrievalQA 
-# from langchain.chains import RetrievalQAWithSourcesChain  
 import streamlit as st
 
 import pandas as pd
-# from langchain_community.document_loaders import PyPDFLoader
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from langchain.document_loaders import WebBaseLoader
 
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.chains import ConversationalRetrievalChain
-
-# from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.schema import SystemMessage, HumanMessage
@@ -285,39 +275,3 @@ def chatbot_(query, main_topic, sub_topic):
   response = result['answer']
 
   return translate_to_tagalog(response)
-
-# csv_file_path = 'chat_history.csv'
-
-# if not os.path.exists(csv_file_path):
-#    with open(csv_file_path, 'w') as f:
-#      f.write('Main_Topic, Sub_Topic, question,response\n')
-
-# def append_to_csv(question, response, metadata):
-#     metadata_values = ",".join(f'"{value}"' for value in metadata.values())
-#     with open(csv_file_path, 'a') as f:
-#         f.write(f'{metadata_values}, "{question}","{response}"\n')
-
-# print("DEVELOPER NOTE: CSV append code")
-
-# def retrieve_response(query):
-#   print("Retrieval Started...")
-#   qa = RetrievalQA.from_chain_type(
-#     llm=openai_llm,  
-#     chain_type="stuff",  
-#     retriever=retriever
-#     # chain_type_kwargs={"prompt": prompt}
-#     )  
-#   print("Retrieval Complete.")
-#   return qa.run(query)
-  
-# def retrieve_response_with_sources(question):
-#   qa_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
-#     llm = openai_llm,
-#     retriever = retriever,
-#     return_source_documents = True,
-#     callbacks = [handler],
-#     # chain_type_kwargs={"prompt": prompt}
-#     )
-#   return qa_with_sources({"question": question})
-
-# print("DEVELOPER NOTE: Retrieval Response Complete")
