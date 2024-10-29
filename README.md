@@ -1,1 +1,3 @@
 # 💬 Center for Migrant Advocacy AI Assistant
+
+CMA App is a human-centered and culturally-attuned LLM-based service designed to enhance the legal and contract literacy of Overseas Filipino Workers (OFWs). Our mission is to empower OFWs with a full understanding of their legal and contractual rights in order to embolden them to action in case of contract violation or employer mistreatment. In a conversational and sensitive tone, the product would provide support services through a secure messaging platform, such as Facebook Messenger or WhatsApp, two popular communication channels within the OFW population, and provide OFWs with information on their legal and contractual rights in real time.  
